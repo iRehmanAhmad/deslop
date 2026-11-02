@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spot the Slop — The Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "DejaVu Sans", "Segoe UI", Verdana, sans-serif;
+    background: #FFF6E3; color: #22252B; min-height: 100vh;
+    padding: 22px 14px 40px 14px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  header {
+    background: #0E7C7B; color: #fff; border: 3px solid #22252B;
+    box-shadow: 6px 6px 0 #22252B; padding: 20px 24px 16px 24px;
+    margin-bottom: 22px;
+  }
+  header .kicker { font-family: "DejaVu Sans Mono", monospace; font-size: 12px; letter-spacing: 2px; color: #FFC53D; text-transform: uppercase; }
+  h1 { font-family: "DejaVu Serif", Georgia, serif; font-size: 40px; line-height: 1.05; margin: 6px 0 8px 0; }
+  h1 .hl { color: #FFC53D; }
+  header p { font-size: 16px; line-height: 1.4; }
+  .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-family: "DejaVu Sans Mono", monospace; font-size: 14px; font-weight: bold; }
+  .bar { height: 14px; border: 2.5px solid #22252B; background: #fff; margin-bottom: 20px; }
+  .bar .fill { height: 100%; background: #E4572E; width: 0%; transition: width .3s; }
+  /* browser frame + sketches */
+  .browser { border: 3px solid #22252B; background: #fff; box-shadow: 6px 6px 0 #22252B; margin-bottom: 22px; }
+  .chrome { background: #E9E6DF; border-bottom: 2px solid #22252B; padding: 8px 12px; display: flex; align-items: center; gap: 6px; }
+  .chrome .dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #22252B; display: inline-block; }
+  .chrome .url { background: #fff; border: 1.5px solid #999; border-radius: 99px; padding: 2px 14px; margin-left: 8px; font-family: "DejaVu Sans Mono", monospace; font-size: 13px; flex: 0 1 340px; }
+  .sketch { min-height: 300px; padding: 26px; position: relative; overflow: hidden; font-size: 15px; }
+  .sketch h3 { font-size: 26px; margin-bottom: 8px; }
+  .sketch .btn { display: inline-block; font-weight: bold; font-size: 15px; padding: 9px 22px; border-radius: 99px; margin-top: 14px; }
+  .bar2 { height: 8px; background: #555; margin-bottom: 7px; }
+  .bar2.light { background: #C9C9C9; }
+  /* round sketches */
+  .q-grad { background: linear-gradient(115deg, #7C3AED, #4F46E5 55%, #2563EB); text-align: center; color: #fff; }
+  .q-grad .pill { display: inline-block; background: rgba(255,255,255,.25); border: 1.5px solid #fff; font-size: 12.5px; font-weight: bold; padding: 4px 14px; border-radius: 99px; margin-top: 12px; }
+  .q-grad h3 { margin-top: 18px; }
+  .q-grad .btn { background: #fff; color: #4F46E5; }
+  .q-bakery { background: #FFFDF4; }
+  .q-bakery h3 { font-family: "DejaVu Serif", Georgia, serif; }
+  .q-bakery .since { font-family: "DejaVu Sans Mono", monospace; font-size: 12px; color: #B23A17; margin-bottom: 14px; }
+  .q-bakery ul { list-style: none; float: left; width: 55%; }
+  .q-bakery li { margin-bottom: 9px; }
+  .q-bakery li b { float: right; }
+  .q-bakery .photo { float: right; width: 38%; height: 130px; background: #FFE9B8; border: 2px solid #22252B; position: relative; }
+  .q-bakery .photo .sun { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: #FFC53D; border: 2px solid #22252B; right: 12px; top: 12px; }
+  .q-bakery .photo .naan { position: absolute; background: #E8B04B; border: 2px solid #8A5A13; border-radius: 50%; }
+  .q-bakery .photo .n1 { width: 62px; height: 44px; left: 14px; bottom: 16px; }
+  .q-bakery .photo .n2 { position: absolute; width: 50px; height: 36px; left: 58px; bottom: 42px; }
+  .q-bakery .photo .cap { position: absolute; bottom: 5px; left: 6px; font-size: 11px; background: rgba(255,255,255,.85); padding: 0 4px; }
+  .q-bakery .phone { clear: both; padding-top: 14px; }
+  .q-cafe { background: #F6F1E5; text-align: center; }
+  .q-cafe h3 { font-family: "DejaVu Serif", Georgia, serif; font-style: italic; font-weight: normal; color: #4A4436; font-size: 30px; }
+  .q-cafe p { font-family: "DejaVu Serif", Georgia, serif; color: #6B6350; margin-bottom: 26px; }
+  .q-cafe .c { display: inline-block; width: 30%; height: 92px; background: #FFFDF6; border: 1.5px solid #B9AE94; margin: 0 4px; vertical-align: top; padding-top: 14px; }
+  .q-cafe .c .d { width: 18px; height: 18px; border-radius: 50%; background: #9CAF88; margin: 0 auto 9px auto; }
+  .q-cafe .c .l { height: 7px; background: #CFC6AC; margin: 0 18px 6px 18px; }
+  .q-library { background: #FDFDF8; }
+  .q-library h3 { font-family: "DejaVu Serif", Georgia, serif; color: #5B4A1F; border-bottom: 4px solid #FFC53D; padding-bottom: 8px; }
+  .q-library table { border-collapse: collapse; margin: 14px 0; }
+  .q-library td { border: 1.5px solid #888; padding: 5px 14px; }
+  .q-library .note { background: #FFF3C4; border: 1.5px solid #B79B2E; padding: 10px 14px; max-width: 480px; transform: rotate(-1deg); }
+  .q-glass { background: #FDF3E3; }
+  .q-glass .blob { position: absolute; border-radius: 50%; }
+  .q-glass .b1 { width: 150px; height: 150px; background: #FFC53D; left: 30px; top: 30px; }
+  .q-glass .b2 { width: 120px; height: 120px; background: #E4572E; right: 46px; top: 90px; }
+  .q-glass .b3 { width: 76px; height: 76px; background: #7C3AED; left: 300px; top: 170px; }
+  .q-glass .glass { position: absolute; left: 90px; right: 90px; top: 52px; background: rgba(255,255,255,.55); border: 2px solid rgba(34,37,43,.55); border-radius: 16px; padding: 24px 28px; text-align: center; }
+  .q-glass .glass .btn { background: #22252B; color: #fff; }
+  .q-emoji h3 { margin-bottom: 14px; }
+  .q-emoji ul { list-style: none; font-size: 17px; }
+  .q-emoji li { margin-bottom: 11px; }
+  .q-emoji .lorem { font-style: italic; color: #999; margin-top: 16px; line-height: 1.5; }
+  .q-band { background: #111; color: #F2EDE4; font-family: "DejaVu Sans Mono", monospace; }
+  .q-band h3 { font-size: 44px; letter-spacing: -1px; line-height: 1; text-transform: uppercase; }
+  .q-band h3 span { color: #E4572E; }
+  .q-band .gig { border-top: 2px dashed #F2EDE4; padding: 8px 0; display: flex; justify-content: space-between; font-size: 14.5px; }
+  .q-band .gig:first-of-type { margin-top: 18px; }
+  .q-center { text-align: center; }
+  .q-center .logo { font-weight: bold; font-size: 18px; margin-bottom: 22px; }
+  .q-center h3 { font-weight: bold; }
+  .q-center p { margin-bottom: 9px; }
+  .q-center .btn { background: #333; color: #fff; }
+  .q-pottery { background: #FBF7EF; }
+  .q-pottery .photo { float: left; width: 42%; height: 190px; background: #D96C33; border: 2.5px solid #22252B; position: relative; margin-right: 22px; }
+  .q-pottery .photo .pot { position: absolute; background: #8A3B12; border: 2px solid #5E2708; border-radius: 46% 46% 40% 40%; }
+  .q-pottery .photo .p1 { width: 74px; height: 92px; left: 30px; bottom: 18px; }
+  .q-pottery .photo .p2 { width: 52px; height: 64px; left: 118px; bottom: 18px; background: #B85C1E; }
+  .q-pottery .photo .cap { position: absolute; bottom: 5px; left: 7px; font-size: 11.5px; color: #fff; }
+  .q-pottery h3 { font-family: "DejaVu Serif", Georgia, serif; }
+  .q-pottery p { line-height: 1.55; margin-bottom: 10px; }
+  .q-course { background: #FAFAF7; text-align: center; }
+  .q-course h3 { margin-bottom: 6px; }
+  .q-course .c { display: inline-block; width: 30%; background: #fff; border: 1.5px solid #BBB; border-radius: 16px; margin: 14px 4px 0 4px; padding: 16px 8px; box-shadow: 0 6px 14px rgba(0,0,0,.14); vertical-align: top; }
+  .q-course .c .d { width: 20px; height: 20px; border-radius: 50%; background: #7C3AED; margin: 0 auto 9px auto; }
+  .q-course .c .l { height: 7px; background: #CCC; margin: 0 14px 6px 14px; }
+  .q-course .c .tick { font-size: 13px; color: #444; }
+  .q-course .btn { background: #2563EB; color: #fff; }
+  /* answer area */
+  .q { font-family: "DejaVu Serif", Georgia, serif; font-size: 24px; text-align: center; margin-bottom: 14px; }
+  .choices { display: flex; gap: 14px; }
+  .choices button {
+    flex: 1; font-family: inherit; font-size: 20px; font-weight: bold;
+    padding: 16px 10px; border: 3px solid #22252B; cursor: pointer; background: #fff;
+  }
+  .choices button.slop { background: #E4572E; color: #fff; box-shadow: 4px 4px 0 #22252B; }
+  .choices button.human { background: #0E7C7B; color: #fff; box-shadow: 4px 4px 0 #22252B; }
+  .choices button:disabled { opacity: .45; cursor: default; box-shadow: none; }
+  .choices button.picked { outline: 4px solid #FFC53D; opacity: 1; }
+  .feedback { display: none; margin-top: 18px; border: 3px solid #22252B; padding: 16px 20px; font-size: 16.5px; line-height: 1.5; }
+  .feedback.good { background: #E2F4D8; display: block; }
+  .feedback.bad { background: #FBE3D8; display: block; }
+  .feedback .verdict { font-family: "DejaVu Serif", Georgia, serif; font-size: 20px; display: block; margin-bottom: 5px; }
+  .feedback .tell { font-weight: bold; color: #B23A17; }
+  .next { display: none; margin-top: 16px; width: 100%; font-family: inherit; font-size: 18px; font-weight: bold; padding: 14px; background: #FFC53D; border: 3px solid #22252B; box-shadow: 4px 4px 0 #22252B; cursor: pointer; }
+  .next.show { display: block; }
+  /* final */
+  .final { display: none; text-align: center; border: 3px solid #22252B; background: #fff; box-shadow: 6px 6px 0 #22252B; padding: 34px 26px; }
+  .final.show { display: block; }
+  .final .score { font-family: "DejaVu Serif", Georgia, serif; font-size: 64px; }
+  .final h2 { font-family: "DejaVu Serif", Georgia, serif; font-size: 30px; margin-bottom: 10px; }
+  .final p { font-size: 16.5px; line-height: 1.5; max-width: 520px; margin: 0 auto 20px auto; }
+  .final button { font-family: inherit; font-size: 18px; font-weight: bold; padding: 14px 30px; background: #E4572E; color: #fff; border: 3px solid #22252B; box-shadow: 4px 4px 0 #22252B; cursor: pointer; }
+  footer { margin-top: 26px; font-size: 12.5px; line-height: 1.55; color: #444; border-top: 2px solid #22252B; padding-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">The 60-second eye test</div>
+    <h1>SPOT THE <span class="hl">SLOP!</span> — THE QUIZ</h1>
+    <p>Ten mini websites. Some were made by AI on autopilot. Some were made by a human who cared. Can you tell them apart?</p>
+  </header>
+
+  <div id="game">
+    <div class="hud"><span id="roundLabel">Round 1 of 10</span><span id="scoreLabel">Score: 0</span></div>
+    <div class="bar"><div class="fill" id="progressFill"></div></div>
+
+    <div class="browser">
+      <div class="chrome">
+        <span class="dot" style="background:#E4572E"></span>
+        <span class="dot" style="background:#FFC53D"></span>
+        <span class="dot" style="background:#2F9E44"></span>
+        <span class="url" id="urlBar">…</span>
+      </div>
+      <div class="sketch" id="sketch"></div>
+    </div>
+
+    <div class="q">Slop — or not?</div>
+    <div class="choices">
+      <button class="slop" id="btnSlop">✗ SLOP!</button>
+      <button class="human" id="btnHuman">✓ HUMAN-MADE</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next" id="btnNext">Next page →</button>
+  </div>
+
+  <div class="final" id="final">
+    <div class="score" id="finalScore">0/10</div>
+    <h2 id="finalTitle"></h2>
+    <p id="finalText"></p>
+    <button id="btnAgain">↻ Play again</button>
+  </div>
+
+  <footer>
+    Spot the Slop quiz · Made with <b>deslop</b>, the free scanner that hunts AI design tells — github.com/iRehmanAhmad/deslop · Older students: check real websites at deslop-checker.rehmanahmad.com<br>
+    Prepared by: Rahman Ahmad Chaudhary — Head Teacher, GPS 117 DB(BJ), Yazman · Free for classroom use (CC BY)
+  </footer>
+
+</div>
+
+<script>
+/* ==== QUIZ DATA — validated by classroom-kit/quiz/selftest.js ==== */
+const ROUNDS = [
+  {
+    name: "FlowPilot", url: "flowpilot.app", slop: true,
+    tell: "The Purple–Blue Fade",
+    why: "The hero melts from purple into blue — the costume AI wears when nobody chose a colour. The shiny badge pill on top is tell number two.",
+    sketch: '<div class="q-grad"><span class="pill">★ VOTED #1 · AI-POWERED</span><h3>Supercharge your workflow</h3><p>The all-in-one platform for modern teams everywhere.</p><span class="btn">Start Free Trial</span></div>'
+  },
+  {
+    name: "Ahmed Bakery", url: "ahmedbakery.pk", slop: false,
+    tell: "",
+    why: "Real prices, a real phone number, a photo of its own tandoor, and words that start at the edge of the page. A human made choices here — nothing to circle.",
+    sketch: '<div class="q-bakery"><h3>Ahmed Bakery</h3><div class="since">FRESH NAAN SINCE 1998 · MAIN BAZAR ROAD</div><ul><li>Butter naan <b>Rs 60</b></li><li>Roghni naan <b>Rs 120</b></li><li>Chicken tikka <b>Rs 450</b></li><li>Family pack (4 naan) <b>Rs 200</b></li></ul><div class="photo"><div class="sun"></div><div class="naan n1"></div><div class="naan n2"></div><div class="cap">Our tandoor, this morning</div></div><p class="phone">Order before 7 pm: 0300-1234567 — free delivery in town</p></div>'
+  },
+  {
+    name: "Willow Studio", url: "willowstudio.design", slop: true,
+    tell: "The Fancy Café Look",
+    why: "Cream background, posh serif letters, sage green — the new “classy” default. Underneath: three identical cards that say nothing.",
+    sketch: '<div class="q-cafe"><h3>Willow &amp; Co. Studio</h3><p>Timeless brands, thoughtfully crafted for modern living.</p><span class="c"><div class="d"></div><div class="l"></div><div class="l" style="margin:0 26px"></div></span><span class="c"><div class="d"></div><div class="l"></div><div class="l" style="margin:0 26px"></div></span><span class="c"><div class="d"></div><div class="l"></div><div class="l" style="margin:0 26px"></div></span></div>'
+  },
+  {
+    name: "City Library", url: "citylibrary.org", slop: false,
+    tell: "",
+    why: "Plain, yes — but every line is real: opening hours, room numbers, and a note from Mrs. Khan about Saturday story time. Humans write specifics; slop writes vibes.",
+    sketch: '<div class="q-library"><h3>City Library — Gulberg Branch</h3><table><tr><td>Mon – Fri</td><td>9 am – 8 pm</td></tr><tr><td>Saturday</td><td>10 am – 5 pm</td></tr><tr><td>Sunday</td><td>Closed (staff rest day)</td></tr></table><div class="note">📌 Saturday 11 am: story time in the children\'s room. This week: “The Clever Crow”. Bring your library card! — Mrs. Khan</div></div>'
+  },
+  {
+    name: "CloudBank", url: "cloudbank.app", slop: true,
+    tell: "Glassy Blur Cards",
+    why: "A frosted see-through panel floating over coloured blobs. Pretty fog, zero information — and the button just says “Get Started”. Get started doing what?",
+    sketch: '<div class="q-glass"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="glass"><h3>Banking, reimagined</h3><div class="bar2" style="width:70%;margin-left:auto;margin-right:auto"></div><div class="bar2" style="width:50%;margin-left:auto;margin-right:auto"></div><span class="btn">Get Started</span></div></div>'
+  },
+  {
+    name: "TaskTiger", url: "tasktiger.com", slop: true,
+    tell: "Emoji Doing the Icons' Job",
+    why: "Rockets, lightning and targets instead of real icons — and look at the bottom: the fake Latin lorem ipsum text was never replaced. Nobody read this page before publishing it.",
+    sketch: '<div class="q-emoji"><h3>Why teams love TaskTiger</h3><ul><li>🚀 Super fast setup</li><li>⚡ Lightning sync</li><li>✅ Unlimited tasks</li><li>🎯 Smart goals</li></ul><p class="lorem">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua…</p></div>'
+  },
+  {
+    name: "The Rusty Nails", url: "rustynails.band", slop: false,
+    tell: "",
+    why: "Loud, crooked and proud of it: real gig dates, real venues, real ticket prices. No template on Earth looks like this — a human chose every clash.",
+    sketch: '<div class="q-band"><h3>The Rusty <span>Nails</span></h3><div class="gig"><span>FRI 14 NOV — The Basement, Lahore</span><b>Rs 800</b></div><div class="gig"><span>SAT 22 NOV — Old Mill Hall, Karachi</span><b>Rs 1,000</b></div><div class="gig"><span>FRI 5 DEC — Rooftop Sessions, Islamabad</span><b>FREE</b></div><p style="margin-top:16px">Doors 7 pm. Earplugs advised. New songs, old amps.</p></div>'
+  },
+  {
+    name: "NoteNest", url: "notenest.io", slop: true,
+    tell: "Everything in the Middle",
+    why: "Every line is centred, every word sits in the same plain font, and the headline is “Welcome to…” — the laziest first line a page can have.",
+    sketch: '<div class="q-center"><div class="logo">NoteNest</div><h3>Welcome to NoteNest</h3><p>Your notes, beautifully organised.</p><p>Everything you write, all in one place.</p><p>Simple. Clean. Powerful.</p><span class="btn">Try It Now</span></div>'
+  },
+  {
+    name: "Fatima's Pottery", url: "fatimaspots.shop", slop: false,
+    tell: "",
+    why: "A big off-centre photo of her actual pots, prices for pots that actually exist, and her own words about her kiln. Specific beats pretty.",
+    sketch: '<div class="q-pottery"><div class="photo"><div class="pot p1"></div><div class="pot p2"></div><div class="cap">Glazing day at the kiln</div></div><h3>Fatima\'s Pottery</h3><p>I make every pot by hand in my Multan workshop. No two are exactly alike — that is the point.</p><p>Tea set (4 cups + pot): <b>Rs 3,200</b><br>Flower vase, blue glaze: <b>Rs 1,450</b></p><p>Orders take 5 days. I pack them myself, in straw, very carefully.</p></div>'
+  },
+  {
+    name: "LearnLoop", url: "learnloop.ai", slop: true,
+    tell: "Three Same-Same Cards",
+    why: "Three identical cards, checkmark lists, and a “Get Started” button. Swap the cards around — would anything change? Then they say nothing.",
+    sketch: '<div class="q-course"><h3>Learning, supercharged</h3><p>Everything you need to level up, seamlessly.</p><span class="c"><div class="d"></div><div class="l"></div><div class="tick">✓ Feature one</div><div class="tick">✓ Feature two</div></span><span class="c"><div class="d"></div><div class="l"></div><div class="tick">✓ Feature one</div><div class="tick">✓ Feature two</div></span><span class="c"><div class="d"></div><div class="l"></div><div class="tick">✓ Feature one</div><div class="tick">✓ Feature two</div></span><br><span class="btn">Get Started</span></div>'
+  }
+];
+</script>
+
+<script>
+(function () {
+  var idx = 0, score = 0, answered = false;
+  var sketchEl = document.getElementById('sketch'),
+      urlEl = document.getElementById('urlBar'),
+      roundEl = document.getElementById('roundLabel'),
+      scoreEl = document.getElementById('scoreLabel'),
+      fillEl = document.getElementById('progressFill'),
+      fbEl = document.getElementById('feedback'),
+      nextBtn = document.getElementById('btnNext'),
+      slopBtn = document.getElementById('btnSlop'),
+      humanBtn = document.getElementById('btnHuman'),
+      gameEl = document.getElementById('game'),
+      finalEl = document.getElementById('final');
+
+  function render() {
+    var r = ROUNDS[idx];
+    answered = false;
+    sketchEl.innerHTML = r.sketch;
+    sketchEl.className = 'sketch';
+    urlEl.textContent = r.url;
+    roundEl.textContent = 'Round ' + (idx + 1) + ' of ' + ROUNDS.length + ' — ' + r.name;
+    scoreEl.textContent = 'Score: ' + score;
+    fillEl.style.width = (idx / ROUNDS.length * 100) + '%';
+    fbEl.className = 'feedback'; fbEl.innerHTML = '';
+    nextBtn.className = 'next';
+    nextBtn.textContent = (idx === ROUNDS.length - 1) ? 'See my score →' : 'Next page →';
+    slopBtn.disabled = false; humanBtn.disabled = false;
+    slopBtn.className = 'slop'; humanBtn.className = 'human';
+  }
+
+  function answer(guessedSlop) {
+    if (answered) return;
+    answered = true;
+    var r = ROUNDS[idx];
+    var right = (guessedSlop === r.slop);
+    if (right) score++;
+    scoreEl.textContent = 'Score: ' + score;
+    fillEl.style.width = ((idx + 1) / ROUNDS.length * 100) + '%';
+    slopBtn.disabled = true; humanBtn.disabled = true;
+    (guessedSlop ? slopBtn : humanBtn).className += ' picked';
+    var head = right ? '✓ Correct!' : '✗ Not quite.';
+    var truth = r.slop ? 'This one IS slop.' : 'This one is HUMAN-MADE.';
+    var tellHtml = r.slop ? ' The tell: <span class="tell">' + r.tell + '</span>. ' : ' ';
+    fbEl.className = 'feedback ' + (right ? 'good' : 'bad');
+    fbEl.innerHTML = '<span class="verdict">' + head + ' ' + truth + '</span>' + tellHtml + r.why;
+    nextBtn.className = 'next show';
+  }
+
+  function finish() {
+    gameEl.style.display = 'none';
+    finalEl.className = 'final show';
+    document.getElementById('finalScore').textContent = score + '/' + ROUNDS.length;
+    var title, text;
+    if (score >= 9) { title = 'Slop Spotter Supreme! 🏆'; text = 'Your eyes are trained. AI builders will have to work much harder to fool you. Take the poster challenge: find all 10 tells on one real website.'; }
+    else if (score >= 7) { title = 'Sharp Eyes! 👀'; text = 'You caught most of the tells. The ones that fooled you are the sneaky new defaults — check the poster again and hunt for them on a real site.'; }
+    else if (score >= 4) { title = 'Getting There 🌱'; text = 'You spotted the loud slop. The quiet slop — cream colours, identical cards — takes practice. Pin the poster up and try the worksheet hunt.'; }
+    else { title = 'The AI Fooled You This Time 🤖'; text = 'No shame — these pages are designed to look “normal”. That is exactly the trick. Study the 10 tells on the poster, then play again and take revenge.'; }
+    document.getElementById('finalTitle').textContent = title;
+    document.getElementById('finalText').textContent = text;
+  }
+
+  slopBtn.addEventListener('click', function () { answer(true); });
+  humanBtn.addEventListener('click', function () { answer(false); });
+  nextBtn.addEventListener('click', function () {
+    idx++;
+    if (idx >= ROUNDS.length) { finish(); } else { render(); }
+  });
+  document.getElementById('btnAgain').addEventListener('click', function () {
+    idx = 0; score = 0;
+    finalEl.className = 'final';
+    gameEl.style.display = 'block';
+    render();
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>

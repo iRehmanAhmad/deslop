@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spot the Slop — Poster</title>
+<style>
+  @page { size: A4 portrait; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 210mm; height: 297mm; }
+  body {
+    font-family: "DejaVu Sans", sans-serif;
+    background: #FFFDF4; color: #22252B;
+    padding: 8mm 10mm 5mm 10mm;
+  }
+  /* ---------- header ---------- */
+  header {
+    background: #0E7C7B; color: #fff;
+    border: 3px solid #22252B; box-shadow: 6px 6px 0 #22252B;
+    padding: 5.5mm 7mm 4.5mm 7mm; margin-bottom: 4mm;
+  }
+  header .kicker {
+    font-family: "DejaVu Sans Mono", monospace; font-size: 9pt;
+    letter-spacing: 2px; color: #FFC53D; text-transform: uppercase;
+  }
+  h1 {
+    font-family: "DejaVu Serif", serif; font-weight: bold;
+    font-size: 36pt; line-height: 1.02; margin: 1.5mm 0 2mm 0;
+  }
+  h1 .hl { color: #FFC53D; }
+  header p { font-size: 12pt; line-height: 1.35; max-width: 165mm; }
+  /* ---------- grid ---------- */
+  .grid { width: 100%; }
+  .row { width: 100%; height: 40mm; margin-bottom: 2.8mm; clear: both; }
+  .card {
+    width: 92.3mm; background: #fff;
+    border: 2.5px solid #22252B; box-shadow: 4px 4px 0 #22252B;
+    padding: 3mm 3.5mm 2.6mm 3.5mm; height: 40mm;
+  }
+  .card.left { float: left; }
+  .card.right { float: right; }
+  .num {
+    display: inline-block; width: 8.5mm; height: 8.5mm; border-radius: 50%;
+    background: #E4572E; color: #fff; border: 2px solid #22252B;
+    font-family: "DejaVu Serif", serif; font-weight: bold; font-size: 13pt;
+    text-align: center; line-height: 8.5mm; vertical-align: middle;
+  }
+  .card h2 {
+    display: inline; font-family: "DejaVu Serif", serif;
+    font-size: 13.5pt; margin-left: 1.5mm; vertical-align: middle;
+  }
+  .exhibit {
+    margin: 2mm 0 1.8mm 0; height: 11.5mm; overflow: hidden;
+    border: 1.5px solid #22252B; background: #fff;
+    position: relative;
+  }
+  .card p { font-size: 8.6pt; line-height: 1.3; }
+  .card p b { color: #B23A17; }
+  /* ---------- exhibits ---------- */
+  .ex-grad { background: linear-gradient(100deg, #7C3AED 0%, #4F46E5 55%, #2563EB 100%); }
+  .ex-grad .bar { background: rgba(255,255,255,.85); height: 2.2mm; margin: 2.4mm auto 0 auto; }
+  .ex-font { text-align: center; font-size: 15pt; padding-top: 1.6mm; color: #333; }
+  .ex-font span { margin: 0 2mm; }
+  .ex-emoji { font-family: "Noto Color Emoji", "DejaVu Sans", sans-serif; text-align: center; font-size: 16pt; padding-top: 1.2mm; letter-spacing: 3mm; }
+  .ex-lorem { font-style: italic; color: #777; font-size: 8.5pt; padding: 1.8mm 3mm; line-height: 1.4; }
+  .ex-center { text-align: center; padding-top: 1.6mm; }
+  .ex-center .l { height: 2mm; background: #444; margin: 0 auto 1.6mm auto; }
+  .ex-badge { text-align: center; padding-top: 1.8mm; background: #F4F1EA; }
+  .pill {
+    display: inline-block; background: #7C3AED; color: #fff; font-size: 7.5pt;
+    font-weight: bold; padding: 1mm 3.5mm; border-radius: 99px; letter-spacing: .5px;
+  }
+  .ex-badge .l { height: 2.4mm; background: #222; width: 55%; margin: 1.8mm auto 0 auto; }
+  .ex-cards { text-align: center; padding-top: 1.6mm; background: #FAFAF7; }
+  .mini {
+    display: inline-block; width: 24mm; height: 9mm; background: #fff;
+    border: 1.5px solid #999; border-radius: 2.5mm; margin: 0 1mm;
+    box-shadow: 0 1.2mm 2.5mm rgba(0,0,0,.18); vertical-align: top;
+  }
+  .mini .d { width: 3mm; height: 3mm; border-radius: 50%; background: #7C3AED; margin: 1.4mm auto 1mm auto; }
+  .mini .l { height: 1.4mm; background: #BBB; margin: 0 3mm; }
+  .ex-btn { text-align: center; padding-top: 2.6mm; background: #F4F1EA; }
+  .btn {
+    display: inline-block; background: #2563EB; color: #fff; font-weight: bold;
+    font-size: 9.5pt; padding: 1.8mm 5mm; border-radius: 99px;
+  }
+  .btn.ghost { background: #fff; color: #2563EB; border: 1.5px solid #2563EB; margin-left: 2mm; }
+  .ex-cafe { background: #F6F1E5; padding: 1.8mm 3mm; }
+  .ex-cafe .t { font-family: "DejaVu Serif", serif; font-style: italic; font-size: 11pt; color: #4A4436; }
+  .ex-cafe .sage { display: inline-block; width: 22mm; height: 2.6mm; background: #9CAF88; margin-top: 1.4mm; }
+  .ex-cafe .sage2 { display: inline-block; width: 13mm; height: 2.6mm; background: #9CAF88; margin-top: 1.4mm; margin-left: 1.5mm; }
+  .ex-glass { background: #FDF3E3; }
+  .blob { position: absolute; border-radius: 50%; }
+  .blob.b1 { width: 13mm; height: 13mm; background: #FFC53D; left: 12mm; top: 1mm; }
+  .blob.b2 { width: 11mm; height: 11mm; background: #E4572E; right: 14mm; top: 2.5mm; }
+  .glass {
+    position: absolute; left: 24mm; right: 24mm; top: 2mm; height: 8.5mm;
+    background: rgba(255,255,255,.55); border: 1.5px solid rgba(34,37,43,.5);
+    border-radius: 2mm; text-align: center; font-size: 8pt; padding-top: 2.4mm; color: #333;
+  }
+  /* ---------- footer ---------- */
+  footer {
+    margin-top: 3.5mm; border-top: 3px solid #22252B; padding-top: 2.6mm;
+    font-size: 8.6pt; line-height: 1.4;
+  }
+  footer .big { font-size: 10.5pt; font-weight: bold; }
+  footer .mono { font-family: "DejaVu Sans Mono", monospace; font-size: 8.4pt; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">A field guide for sharp eyes</div>
+  <h1>SPOT THE <span class="hl">SLOP!</span></h1>
+  <p><b>Ten signs a website was made by AI</b> — AI website builders make pages
+  that all look the same. Train your eyes on these ten tells, and you will
+  spot a copy-paste website anywhere.</p>
+</header>
+
+<div class="grid">
+
+  <div class="row">
+    <div class="card left">
+      <span class="num">1</span><h2>The Purple–Blue Fade</h2>
+      <div class="exhibit ex-grad"><div class="bar" style="width:55%"></div><div class="bar" style="width:35%"></div></div>
+      <p>The page top melts from purple into blue. <b>Real designers pick colours on purpose — AI picks this one every time.</b></p>
+    </div>
+    <div class="card right">
+      <span class="num">2</span><h2>One Font for Everything</h2>
+      <div class="exhibit ex-font"><span>Aa</span><span>Aa</span><span>Aa</span><span>Aa</span></div>
+      <p>Headings, text, buttons — all in the same plain font. <b>A page with no font choices is a page nobody designed.</b></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card left">
+      <span class="num">3</span><h2>Emoji Doing the Icons' Job</h2>
+      <div class="exhibit ex-emoji">🚀 ⭐ ✅ 🔥</div>
+      <p>Rockets, stars and ticks instead of real icons. <b>Emoji change on every phone — real icons are drawn for the job.</b></p>
+    </div>
+    <div class="card right">
+      <span class="num">4</span><h2>Lorem Ipsum Left Behind</h2>
+      <div class="exhibit ex-lorem">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore…</div>
+      <p>Fake Latin words still sitting on the finished page. <b>It means nobody even read the page before publishing it.</b></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card left">
+      <span class="num">5</span><h2>Everything in the Middle</h2>
+      <div class="exhibit ex-center"><div class="l" style="width:60%"></div><div class="l" style="width:42%"></div><div class="l" style="width:52%"></div></div>
+      <p>Every line is centred; nothing lines up at the edges. <b>Centring everything means nobody chose a layout.</b></p>
+    </div>
+    <div class="card right">
+      <span class="num">6</span><h2>The Shiny Badge Pill</h2>
+      <div class="exhibit ex-badge"><span class="pill">★ NEW · AI-POWERED</span><div class="l"></div></div>
+      <p>A little lozenge floats over the headline shouting “NEW!” <b>It's decoration dressed up as news.</b></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card left">
+      <span class="num">7</span><h2>Three Same-Same Cards</h2>
+      <div class="exhibit ex-cards"><span class="mini"><div class="d"></div><div class="l"></div></span><span class="mini"><div class="d"></div><div class="l"></div></span><span class="mini"><div class="d"></div><div class="l"></div></span></div>
+      <p>Three boxes in a row: same shape, same words. <b>If they could swap places unnoticed, they say nothing.</b></p>
+    </div>
+    <div class="card right">
+      <span class="num">8</span><h2>“Get Started” Buttons</h2>
+      <div class="exhibit ex-btn"><span class="btn">Get Started</span><span class="btn ghost">Learn More</span></div>
+      <p>Get started doing <i>what</i>? <b>A good button names the job: “Download the worksheet”, “Book a table”.</b></p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card left">
+      <span class="num">9</span><h2>The Fancy Café Look</h2>
+      <div class="exhibit ex-cafe"><div class="t">Maison Digitale — studio</div><span class="sage"></span><span class="sage2"></span></div>
+      <p>Cream background, posh serif letters, soft sage green. <b>The new “classy” costume AI wears to look expensive.</b></p>
+    </div>
+    <div class="card right">
+      <span class="num">10</span><h2>Glassy Blur Cards</h2>
+      <div class="exhibit ex-glass"><div class="blob b1"></div><div class="blob b2"></div><div class="glass">frosted panel</div></div>
+      <p>Frosted see-through panels float over coloured blobs. <b>Pretty fog, zero information — content should come first.</b></p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <span class="big">Found all 10 on one page? That's a Slop Score of 100.</span>
+  Check any real website free with <b>deslop</b>, the scanner that hunts these tells:
+  <span class="mono">deslop-checker.rehmanahmad.com</span> · Code: <span class="mono">github.com/iRehmanAhmad/deslop</span><br>
+  Prepared by: Rahman Ahmad Chaudhary — Head Teacher, GPS 117 DB(BJ), Yazman · Free for classroom use (CC BY) — print it, pin it, share it.
+</footer>
+
+</body>
+</html>

@@ -124,6 +124,24 @@ at 0; one launch refused the fetch (HTTP 403) and is recorded as a
 failure, not skipped. Weekly runs turn the snapshots into a trend — and
 their fingerprints into a corpus of real-world layout twins.
 
+## For teachers: the Spot the Slop kit
+
+The maintainer is a head teacher by day, so the ten tells also exist as
+free classroom material in [`classroom-kit/`](classroom-kit/) (CC BY —
+print it, pin it, share it):
+
+- **A one-page A4 poster** — the 10 signs a website was made by AI, each
+  with a tiny drawing of the crime and one plain line on why it matters.
+- **A two-page worksheet** — six drawn mini-websites to circle-and-name
+  (five are slop; one is a real bakery, and that's the lesson), then a
+  checklist hunt on a real website with a teacher answer key.
+- **An offline quiz** — [`quiz/index.html`](classroom-kit/quiz/index.html),
+  ten rounds of "Slop or Not?" with instant feedback. One self-contained
+  file, double-click to play, no internet needed.
+
+Plus a 20-minute lesson plan (hook → poster → worksheet → quiz) and
+printing notes in the kit's README.
+
 ## What it catches
 
 40 rules: 5 `fail` (Inter as the only font, purple-to-blue gradients in CSS

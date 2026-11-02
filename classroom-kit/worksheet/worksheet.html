@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spot the Slop — Worksheet</title>
+<style>
+  @page { size: A4 portrait; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "DejaVu Sans", sans-serif;
+    background: #fff; color: #22252B;
+  }
+  .page { width: 210mm; height: 297mm; padding: 9mm 10mm 7mm 10mm; page-break-after: always; position: relative; }
+  .page:last-child { page-break-after: avoid; }
+
+  /* ---------- shared ---------- */
+  .brand {
+    position: absolute; bottom: 6mm; left: 10mm; right: 10mm;
+    border-top: 2px solid #22252B; padding-top: 2mm;
+    font-size: 8pt; color: #333;
+  }
+  .brand .mono { font-family: "DejaVu Sans Mono", monospace; font-size: 7.8pt; }
+
+  /* ---------- page 1 header ---------- */
+  .head { border: 3px solid #22252B; box-shadow: 5px 5px 0 #22252B; background: #FFC53D; padding: 4mm 5mm 3.5mm 5mm; margin-bottom: 4mm; }
+  .head h1 { font-family: "DejaVu Serif", serif; font-size: 21pt; line-height: 1.05; }
+  .head h1 span { color: #B23A17; }
+  .head p { font-size: 10pt; margin-top: 1.2mm; }
+  .who { font-size: 10.5pt; margin-bottom: 4mm; }
+  .who .line { display: inline-block; border-bottom: 1.5px solid #22252B; width: 52mm; margin: 0 3mm 0 1.5mm; }
+  .who .line.short { width: 30mm; }
+
+  /* ---------- mini webpages ---------- */
+  .minis { width: 100%; }
+  .mrow { clear: both; height: 71mm; margin-bottom: 3mm; }
+  .mini { width: 92.3mm; }
+  .mini.left { float: left; }
+  .mini.right { float: right; }
+  .mini .tag {
+    font-family: "DejaVu Sans Mono", monospace; font-size: 8.5pt; font-weight: bold;
+    margin-bottom: 1.2mm;
+  }
+  .mini .tag b { background: #0E7C7B; color: #fff; padding: .4mm 1.8mm; border: 1.5px solid #22252B; }
+  .browser { border: 2px solid #22252B; background: #fff; height: 52mm; overflow: hidden; }
+  .chrome { background: #E9E6DF; border-bottom: 1.5px solid #22252B; padding: 1.2mm 2mm; font-size: 7.5pt; }
+  .chrome .dot { display: inline-block; width: 2.6mm; height: 2.6mm; border-radius: 50%; border: 1px solid #22252B; margin-right: 1mm; vertical-align: middle; }
+  .chrome .url { display: inline-block; background: #fff; border: 1px solid #999; border-radius: 99px; padding: .3mm 3mm; margin-left: 2mm; font-family: "DejaVu Sans Mono", monospace; font-size: 7pt; vertical-align: middle; width: 52mm; }
+  .prompt { font-size: 8.8pt; margin-top: 1.6mm; line-height: 1.35; }
+  .prompt .write { display: inline-block; border-bottom: 1.2px solid #666; width: 62mm; }
+  .prompt .write.wide { width: 88.5mm; display: block; margin-top: 1mm; }
+
+  /* sketch pieces */
+  .sk { padding: 3mm; height: 100%; position: relative; }
+  .bar { height: 2.2mm; background: #555; margin-bottom: 1.8mm; }
+  .bar.light { background: #C9C9C9; }
+  /* A: gradient hero */
+  .sk-a { background: linear-gradient(115deg, #7C3AED, #4F46E5 55%, #2563EB); text-align: center; color: #fff; }
+  .sk-a .pill { display: inline-block; background: rgba(255,255,255,.25); border: 1.2px solid #fff; color: #fff; font-size: 7.5pt; font-weight: bold; padding: .8mm 3mm; border-radius: 99px; margin-top: 2mm; }
+  .sk-a h3 { font-size: 14pt; margin: 2.5mm 0 1.5mm 0; font-weight: bold; }
+  .sk-a p { font-size: 8pt; }
+  .sk-a .btn { display: inline-block; background: #fff; color: #4F46E5; font-weight: bold; font-size: 8.5pt; padding: 1.4mm 4.5mm; border-radius: 99px; margin-top: 3mm; }
+  /* B: all centred, one font */
+  .sk-b { text-align: center; }
+  .sk-b .logo { font-weight: bold; font-size: 10pt; margin-bottom: 3mm; }
+  .sk-b h3 { font-size: 13pt; font-weight: bold; margin-bottom: 2mm; }
+  .sk-b p { font-size: 8.5pt; margin-bottom: 1.6mm; }
+  .sk-b .btn { display: inline-block; background: #333; color: #fff; font-size: 8.5pt; padding: 1.4mm 4.5mm; border-radius: 99px; margin-top: 1.5mm; }
+  /* C: emoji + lorem */
+  .sk-c h3 { font-size: 12.5pt; font-weight: bold; margin-bottom: 2mm; }
+  .sk-c ul { list-style: none; font-size: 9pt; }
+  .sk-c li { margin-bottom: 1.6mm; font-family: "DejaVu Sans", "Noto Color Emoji", sans-serif; }
+  .sk-c .lorem { font-style: italic; color: #888; font-size: 8pt; margin-top: 2.5mm; line-height: 1.4; }
+  /* D: fancy cafe */
+  .sk-d { background: #F6F1E5; text-align: center; }
+  .sk-d h3 { font-family: "DejaVu Serif", serif; font-style: italic; font-weight: normal; font-size: 13.5pt; color: #4A4436; margin-bottom: 1.5mm; }
+  .sk-d p { font-family: "DejaVu Serif", serif; font-size: 8.5pt; color: #6B6350; margin-bottom: 3mm; }
+  .sk-d .cards { text-align: center; }
+  .sk-d .c { display: inline-block; width: 25mm; height: 15mm; background: #FFFDF6; border: 1px solid #B9AE94; margin: 0 1mm; vertical-align: top; padding-top: 2mm; }
+  .sk-d .c .d { width: 3.4mm; height: 3.4mm; border-radius: 50%; background: #9CAF88; margin: 0 auto 1.4mm auto; }
+  .sk-d .c .l { height: 1.5mm; background: #CFC6AC; margin: 0 3.5mm 1.2mm 3.5mm; }
+  /* E: glass */
+  .sk-e { background: #FDF3E3; overflow: hidden; }
+  .sk-e .blob { position: absolute; border-radius: 50%; }
+  .sk-e .b1 { width: 26mm; height: 26mm; background: #FFC53D; left: 6mm; top: 4mm; }
+  .sk-e .b2 { width: 20mm; height: 20mm; background: #E4572E; right: 8mm; top: 12mm; }
+  .sk-e .b3 { width: 12mm; height: 12mm; background: #7C3AED; left: 38mm; top: 20mm; }
+  .sk-e .glass { position: absolute; left: 16mm; right: 16mm; top: 5.5mm; background: rgba(255,255,255,.55); border: 1.5px solid rgba(34,37,43,.55); border-radius: 3mm; padding: 3mm 4mm; text-align: center; }
+  .sk-e .glass h3 { font-size: 11.5pt; margin-bottom: 1.5mm; }
+  .sk-e .glass .bar { background: rgba(34,37,43,.45); }
+  .sk-e .glass .btn { display: inline-block; background: #22252B; color: #fff; font-size: 8.5pt; font-weight: bold; padding: 1.4mm 4.5mm; border-radius: 99px; margin-top: 1mm; }
+  /* F: human bakery */
+  .sk-f { background: #FFFDF4; }
+  .sk-f h3 { font-family: "DejaVu Serif", serif; font-size: 13pt; margin-bottom: 1mm; }
+  .sk-f .since { font-family: "DejaVu Sans Mono", monospace; font-size: 7.5pt; color: #B23A17; margin-bottom: 2.5mm; }
+  .sk-f ul { list-style: none; font-size: 8.6pt; float: left; width: 52mm; }
+  .sk-f li { margin-bottom: 1.3mm; }
+  .sk-f li b { float: right; }
+  .sk-f .photo { float: right; width: 26mm; height: 20mm; background: #FFE9B8; border: 1.5px solid #22252B; position: relative; }
+  .sk-f .photo .sun { position: absolute; width: 6mm; height: 6mm; border-radius: 50%; background: #FFC53D; border: 1.2px solid #22252B; right: 2.5mm; top: 2.5mm; }
+  .sk-f .photo .naan { position: absolute; background: #E8B04B; border: 1.2px solid #8A5A13; border-radius: 50%; }
+  .sk-f .photo .n1 { width: 11mm; height: 8mm; left: 2.5mm; bottom: 3mm; }
+  .sk-f .photo .n2 { width: 9mm; height: 6.5mm; left: 10mm; bottom: 6mm; }
+  .sk-f .photo .cap { position: absolute; bottom: 1mm; left: 1.2mm; font-size: 6.3pt; color: #333; background: rgba(255,255,255,.85); padding: 0 1mm; }
+  .sk-f .phone { clear: both; padding-top: 1.6mm; font-size: 8.6pt; }
+
+  /* ---------- page 2 ---------- */
+  .head2 { border: 3px solid #22252B; box-shadow: 5px 5px 0 #22252B; background: #0E7C7B; color: #fff; padding: 4mm 5mm 3.5mm 5mm; margin-bottom: 4mm; }
+  .head2 h1 { font-family: "DejaVu Serif", serif; font-size: 21pt; line-height: 1.05; }
+  .head2 h1 span { color: #FFC53D; }
+  .head2 p { font-size: 10pt; margin-top: 1.2mm; line-height: 1.4; }
+  .site { font-size: 10.5pt; margin-bottom: 3.5mm; }
+  .site .line { display: inline-block; border-bottom: 1.5px solid #22252B; width: 95mm; margin-left: 2mm; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 3.5mm; }
+  th, td { border: 1.8px solid #22252B; padding: 1.7mm 2.2mm; font-size: 9.6pt; text-align: left; }
+  th { background: #FFC53D; font-family: "DejaVu Serif", serif; font-size: 10.5pt; }
+  td.tick { width: 20mm; text-align: center; }
+  td.where { width: 62mm; }
+  tr { height: 9mm; }
+  .scorebox { border: 2.5px solid #22252B; box-shadow: 4px 4px 0 #22252B; padding: 3.2mm 4mm; margin-bottom: 3.5mm; background: #FFF8E8; }
+  .scorebox .big { font-family: "DejaVu Serif", serif; font-size: 13.5pt; }
+  .scorebox .blank { display: inline-block; border-bottom: 2px solid #22252B; width: 18mm; }
+  .scorebox p { font-size: 9pt; margin-top: 1.5mm; line-height: 1.4; }
+  .think { font-size: 10.5pt; line-height: 1.95; margin-bottom: 3.5mm; }
+  .think .line { display: inline-block; border-bottom: 1.5px solid #666; width: 78mm; }
+  .think .line.long { width: 150mm; }
+  .key { border: 2.5px dashed #B23A17; background: #FDF0E9; padding: 3.2mm 4mm; font-size: 9.1pt; line-height: 1.45; }
+  .key h3 { font-family: "DejaVu Serif", serif; font-size: 12pt; color: #B23A17; margin-bottom: 1.5mm; }
+  .key b { color: #B23A17; }
+</style>
+</head>
+<body>
+
+<!-- ================= PAGE 1 ================= -->
+<div class="page">
+  <div class="head">
+    <h1>SPOT THE SLOP — <span>Worksheet 1: Find the Slop</span></h1>
+    <p>Six mini websites are hiding below. Five of them are AI slop. One is not. Circle every tell you can find, then name it. Use the poster to help you!</p>
+  </div>
+  <div class="who">Name: <span class="line"></span> Class: <span class="line short"></span> Date: <span class="line short"></span></div>
+
+  <div class="minis">
+    <div class="mrow">
+      <div class="mini left">
+        <div class="tag"><b>PAGE A</b> FlowPilot — a “productivity” app</div>
+        <div class="browser">
+          <div class="chrome"><span class="dot" style="background:#E4572E"></span><span class="dot" style="background:#FFC53D"></span><span class="dot" style="background:#2F9E44"></span><span class="url">flowpilot.app</span></div>
+          <div class="sk sk-a">
+            <span class="pill">★ VOTED #1 · AI-POWERED</span>
+            <h3>Supercharge your workflow</h3>
+            <p>The all-in-one platform for modern teams everywhere.</p>
+            <span class="btn">Start Free Trial</span>
+          </div>
+        </div>
+        <p class="prompt">✎ Circle the slop! Name the tell(s): <span class="write"></span></p>
+      </div>
+      <div class="mini right">
+        <div class="tag"><b>PAGE B</b> NoteNest — a notes app</div>
+        <div class="browser">
+          <div class="chrome"><span class="dot" style="background:#E4572E"></span><span class="dot" style="background:#FFC53D"></span><span class="dot" style="background:#2F9E44"></span><span class="url">notenest.io</span></div>
+          <div class="sk sk-b">
+            <div class="logo">NoteNest</div>
+            <h3>Welcome to NoteNest</h3>
+            <p>Your notes, beautifully organised.</p>
+            <p>Everything you write, all in one place.</p>
+            <p>Simple. Clean. Powerful.</p>
+            <span class="btn">Try It Now</span>
+          </div>
+        </div>
+        <p class="prompt">✎ Circle the slop! Name the tell(s): <span class="write"></span></p>
+      </div>
+    </div>
+
+    <div class="mrow">
+      <div class="mini left">
+        <div class="tag"><b>PAGE C</b> TaskTiger — a to-do app</div>
+        <div class="browser">
+          <div class="chrome"><span class="dot" style="background:#E4572E"></span><span class="dot" style="background:#FFC53D"></span><span class="dot" style="background:#2F9E44"></span><span class="url">tasktiger.com</span></div>
+          <div class="sk sk-c">
+            <h3>Why teams love TaskTiger</h3>
+            <ul>
+              <li>🚀 Super fast setup</li>
+              <li>⚡ Lightning sync</li>
+              <li>✅ Unlimited tasks</li>
+              <li>🎯 Smart goals</li>
+            </ul>
+            <p class="lorem">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim…</p>
+          </div>
+        </div>
+        <p class="prompt">✎ Circle the slop! Name the tell(s): <span class="write"></span></p>
+      </div>
+      <div class="mini right">
+        <div class="tag"><b>PAGE D</b> Willow Studio — a design studio</div>
+        <div class="browser">
+          <div class="chrome"><span class="dot" style="background:#E4572E"></span><span class="dot" style="background:#FFC53D"></span><span class="dot" style="background:#2F9E44"></span><span class="url">willowstudio.design</span></div>
+          <div class="sk sk-d">
+            <h3>Willow &amp; Co. Studio</h3>
+            <p>Timeless brands, thoughtfully crafted for modern living.</p>
+            <div class="cards">
+              <span class="c"><div class="d"></div><div class="l"></div><div class="l" style="margin:0 5mm"></div></span>
+              <span class="c"><div class="d"></div><div class="l"></div><div class="l" style="margin:0 5mm"></div></span>
+              <span class="c"><div class="d"></div><div class="l"></div><div class="l" style="margin:0 5mm"></div></span>
+            </div>
+          </div>
+        </div>
+        <p class="prompt">✎ Circle the slop! Name the tell(s): <span class="write"></span></p>
+      </div>
+    </div>
+
+    <div class="mrow">
+      <div class="mini left">
+        <div class="tag"><b>PAGE E</b> CloudBank — a money app</div>
+        <div class="browser">
+          <div class="chrome"><span class="dot" style="background:#E4572E"></span><span class="dot" style="background:#FFC53D"></span><span class="dot" style="background:#2F9E44"></span><span class="url">cloudbank.app</span></div>
+          <div class="sk sk-e">
+            <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+            <div class="glass">
+              <h3>Banking, reimagined</h3>
+              <div class="bar" style="width:70%;margin-left:auto;margin-right:auto"></div>
+              <div class="bar" style="width:50%;margin-left:auto;margin-right:auto"></div>
+              <span class="btn">Get Started</span>
+            </div>
+          </div>
+        </div>
+        <p class="prompt">✎ Circle the slop! Name the tell(s): <span class="write"></span></p>
+      </div>
+      <div class="mini right">
+        <div class="tag"><b>PAGE F</b> Ahmed Bakery — a real bakery</div>
+        <div class="browser">
+          <div class="chrome"><span class="dot" style="background:#E4572E"></span><span class="dot" style="background:#FFC53D"></span><span class="dot" style="background:#2F9E44"></span><span class="url">ahmedbakery.pk</span></div>
+          <div class="sk sk-f">
+            <h3>Ahmed Bakery</h3>
+            <div class="since">FRESH NAAN SINCE 1998 · MAIN BAZAR ROAD</div>
+            <ul>
+              <li>Butter naan <b>Rs 60</b></li>
+              <li>Roghni naan <b>Rs 120</b></li>
+              <li>Chicken tikka <b>Rs 450</b></li>
+              <li>Family pack (4 naan) <b>Rs 200</b></li>
+            </ul>
+            <div class="photo">
+              <div class="sun"></div><div class="naan n1"></div><div class="naan n2"></div>
+              <div class="cap">Our tandoor, this morning</div>
+            </div>
+            <p class="phone">📞 Order before 7 pm: 0300-1234567 — free delivery in town</p>
+          </div>
+        </div>
+        <p class="prompt">✎ Hmm — this page feels different. If you find <b>no slop</b>, write what makes it feel real: <span class="write wide"></span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand">Prepared by: Rahman Ahmad Chaudhary — Head Teacher, GPS 117 DB(BJ), Yazman · Spot the Slop kit · <span class="mono">github.com/iRehmanAhmad/deslop</span> · Free for classroom use (CC BY)</div>
+</div>
+
+<!-- ================= PAGE 2 ================= -->
+<div class="page">
+  <div class="head2">
+    <h1>WORKSHEET 2 — <span>The Great Slop Hunt</span></h1>
+    <p>Now hunt on a <b>real</b> website — one your teacher assigns, or a site you use every day. Tick every tell you find and note exactly where you saw it.</p>
+  </div>
+  <div class="site">Website I hunted: <span class="line"></span></div>
+
+  <table>
+    <tr><th style="width:88mm">The tell</th><th style="width:20mm">Found it?</th><th>Where exactly? (which part of the page)</th></tr>
+    <tr><td>1 · The Purple–Blue Fade</td><td class="tick">☐</td><td class="where"></td></tr>
+    <tr><td>2 · One Font for Everything</td><td class="tick">☐</td><td class="where"></td></tr>
+    <tr><td>3 · Emoji Doing the Icons' Job</td><td class="tick">☐</td><td class="where"></td></tr>
+    <tr><td>4 · Lorem Ipsum Left Behind</td><td class="tick">☐</td><td class="where"></td></tr>
+    <tr><td>5 · Everything in the Middle</td><td class="tick">☐</td><td class="where"></td></tr>
+    <tr><td>6 · The Shiny Badge Pill</td><td class="tick">☐</td><td class="where"></td></tr>
+    <tr><td>7 · Three Same-Same Cards</td><td class="tick">☐</td><td class="where"></td></tr>
+    <tr><td>8 · “Get Started” Buttons</td><td class="tick">☐</td><td class="where"></td></tr>
+    <tr><td>9 · The Fancy Café Look</td><td class="tick">☐</td><td class="where"></td></tr>
+    <tr><td>10 · Glassy Blur Cards</td><td class="tick">☐</td><td class="where"></td></tr>
+  </table>
+
+  <div class="scorebox">
+    <span class="big">My Slop Score guess for this site: <span class="blank"></span> / 100</span>
+    <p><b>0</b> = a human clearly designed it, choice by choice. <b>100</b> = pure copy-paste AI slop. Teachers and older students: check the site's real score free at <span style="font-family:'DejaVu Sans Mono',monospace">deslop-checker.rehmanahmad.com</span> — how close was your guess?</p>
+  </div>
+
+  <div class="think">
+    The worst tell on this site was <span class="line"></span> because <span class="line"></span><br>
+    If I could fix one thing first, I would <span class="line long"></span>
+  </div>
+
+  <div class="key">
+    <h3>✂ TEACHER ANSWER KEY — Worksheet 1 (don't hand this part to students!)</h3>
+    <b>Page A (FlowPilot):</b> The Purple–Blue Fade + The Shiny Badge Pill. (Bonus talk: “Supercharge your workflow” is AI copy — it could describe any app on Earth.)<br>
+    <b>Page B (NoteNest):</b> Everything in the Middle + One Font for Everything. (Bonus: “Welcome to…” is the laziest headline there is.)<br>
+    <b>Page C (TaskTiger):</b> Emoji Doing the Icons' Job + Lorem Ipsum Left Behind.<br>
+    <b>Page D (Willow Studio):</b> The Fancy Café Look (cream + serif + sage) + Three Same-Same Cards.<br>
+    <b>Page E (CloudBank):</b> Glassy Blur Cards + a “Get Started” Button.<br>
+    <b>Page F (Ahmed Bakery):</b> <b>No slop.</b> Real prices, a real phone number, a photo of its own tandoor, text that starts at the edge, and fonts and colours somebody chose. Nothing to circle — that's the point.
+  </div>
+
+  <div class="brand">Prepared by: Rahman Ahmad Chaudhary — Head Teacher, GPS 117 DB(BJ), Yazman · Spot the Slop kit · <span class="mono">github.com/iRehmanAhmad/deslop</span> · Free for classroom use (CC BY)</div>
+</div>
+
+</body>
+</html>
