@@ -87,7 +87,8 @@ function run(args) {
     else if (arg === "--dry-run") dryRun = true;
     else if (arg === "--help" || arg === "-h") {
       console.log("Usage:");
-      console.log("  node bin/deslop.js install [--claude] [--cursor] [--dry-run]");
+      console.log("  deslop install [--claude] [--cursor] [--dry-run]");
+      console.log("  (from source: node bin/deslop.js install [same options])");
       console.log("");
       console.log("  (no flags)  install for Claude Code: project .claude/skills + user ~/.claude/skills");
       console.log("  --cursor    also write the project Cursor rule (.cursor/rules/deslop.mdc)");

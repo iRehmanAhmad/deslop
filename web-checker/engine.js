@@ -489,7 +489,35 @@ const FILE_RULES = [
     threshold: 4,
     message: (n) => `Em-dash used ${n} times in UI copy — the punctuation equivalent of the purple gradient`,
     hint: "Vary the punctuation: full stops, colons, commas. One em-dash is style; ten is a fingerprint.",
-    count: (lines) => lines.reduce((acc, l) => acc + (l.match(/—/g) || []).length, 0),
+    // The rule measures UI copy, not essays: em-dashes inside a long
+    // prose block (a <p> or <article> carrying more than 40 words of
+    // text) are excluded — a magazine article's punctuation is an
+    // author's style, not a template tell.
+    count: (lines, content) => {
+      const total = (content.match(/—/g) || []).length;
+      const blocks = [];
+      const blockRe = /<(p|article)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+      let m;
+      while ((m = blockRe.exec(content)) !== null) {
+        const text = m[2].replace(/<[^>]+>/g, " ");
+        const words = text.split(/\s+/).filter(Boolean).length;
+        blocks.push({
+          start: m.index, end: m.index + m[0].length, words,
+          dashes: (m[2].match(/—/g) || []).length,
+        });
+      }
+      // Outermost blocks first, so an <article> and the <p>s inside it
+      // are never both subtracted.
+      blocks.sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start));
+      let excluded = 0;
+      let coveredUntil = -1;
+      for (const b of blocks) {
+        if (b.start < coveredUntil) continue;
+        coveredUntil = b.end;
+        if (b.words > 40) excluded += b.dashes;
+      }
+      return Math.max(0, total - excluded);
+    },
   },
   {
     id: "text-center-everywhere",
@@ -680,8 +708,58 @@ function defaults2026Findings(lines, content, rel, ext, prior) {
     }
   });
 
+  // Badge pill above the hero headline — computed here because it is
+  // also the "third signal" that can complete the 2026 combo below.
+  let badgeHit = null;
+  if (MARKUP_EXTENSIONS.has(ext)) {
+    const h1 = content.search(/<h1[\s>]/i);
+    if (h1 > 0) {
+      const before = content.slice(0, h1);
+      const elRe = /<(span|div|a|p|small)\b[^>]*?class\s*=\s*["']([^"']*)["'][^>]*>([^<]{1,60})<\//gi;
+      let m;
+      while ((m = elRe.exec(before)) !== null) {
+        const text = m[3].trim();
+        if (!text) continue;
+        const tokens = m[2].toLowerCase().split(/\s+/);
+        const named = tokens.some((t) => /^(badge|pill|chip)(-|$)/.test(t));
+        const round = tokens.includes("rounded-full") && text.length <= 40;
+        if (named || round) {
+          badgeHit = {
+            line: before.slice(0, m.index).split("\n").length,
+            text,
+          };
+          break;
+        }
+      }
+    }
+  }
+
+  // Editorial exemption: cream + a serif display face is ALSO what a
+  // real magazine looks like, and the combo alone cannot tell a
+  // literary page from the template. A page carrying strong long-form
+  // markers — substantial prose in <p>/<article> blocks (300+ words),
+  // or byline / date / drop-cap furniture — is read as editorial, and
+  // the combo by itself does not fire there. A third default signal
+  // (a sage accent, or the badge pill over the hero) completes the
+  // template anyway and lifts the exemption.
+  let editorial = false;
+  if (MARKUP_EXTENSIONS.has(ext)) {
+    let proseWords = 0;
+    const pRe = /<(?:p|article)\b[^>]*>([\s\S]*?)<\/(?:p|article)>/gi;
+    let pm;
+    while ((pm = pRe.exec(content)) !== null) {
+      proseWords += pm[1].replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
+    }
+    const markers =
+      /\bbyline\b/i.test(content) ||
+      /<time\b[^>]*\bdatetime\s*=/i.test(content) ||
+      /\bdrop-?cap\b/i.test(content) ||
+      /\bdateline\b/i.test(content);
+    editorial = proseWords > 300 || markers;
+  }
+
   /* --- cream-serif-default: the combo is the tell -------------------- */
-  if (creamLine && serifLine) {
+  if (creamLine && serifLine && (!editorial || sageLine || badgeHit)) {
     push(creamLine, "cream-serif-default",
       "Cream background + serif display type — the 2026 AI default look, the combo that quietly replaced the purple gradient",
       "Break the combo decisively: keep the cream and set the display type in a grotesque with character, or keep the serif and give the page a real colour story. Changing neither is the template.");
@@ -749,26 +827,10 @@ function defaults2026Findings(lines, content, rel, ext, prior) {
   }
 
   /* --- hero-badge-pill ------------------------------------------------ */
-  if (MARKUP_EXTENSIONS.has(ext)) {
-    const h1 = content.search(/<h1[\s>]/i);
-    if (h1 > 0) {
-      const before = content.slice(0, h1);
-      const elRe = /<(span|div|a|p|small)\b[^>]*?class\s*=\s*["']([^"']*)["'][^>]*>([^<]{1,60})<\//gi;
-      let m;
-      while ((m = elRe.exec(before)) !== null) {
-        const text = m[3].trim();
-        if (!text) continue;
-        const tokens = m[2].toLowerCase().split(/\s+/);
-        const named = tokens.some((t) => /^(badge|pill|chip)(-|$)/.test(t));
-        const round = tokens.includes("rounded-full") && text.length <= 40;
-        if (named || round) {
-          push(before.slice(0, m.index).split("\n").length, "hero-badge-pill",
-            `Badge pill floating above the hero headline ("${text}") — the "✦ Introducing…" default`,
-            "If the news is real, put it in the headline or a dated changelog entry. A pill above the H1 that says 'New' or 'AI-powered' is decoration dressed as news.");
-          break;
-        }
-      }
-    }
+  if (badgeHit) {
+    push(badgeHit.line, "hero-badge-pill",
+      `Badge pill floating above the hero headline ("${badgeHit.text}") — the "✦ Introducing…" default`,
+      "If the news is real, put it in the headline or a dated changelog entry. A pill above the H1 that says 'New' or 'AI-powered' is decoration dressed as news.");
   }
 
   /* --- left-border-accent-card ---------------------------------------- */

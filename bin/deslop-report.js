@@ -2,9 +2,9 @@
 /**
  * deslop-report — turn a deslop scan into a client-facing audit report.
  *
- *   node bin/deslop-report.js <path-or-url> [--out report.html]
+ *   deslop report <path-or-url> [--out report.html]
  *                               [--client "Client Name"] [--site "Site Name"]
- *   node bin/deslop.js report <path-or-url> [same options]
+ *   (from source: node bin/deslop-report.js <path-or-url> [same options])
  *
  * Scans a local file/folder (like the CLI) or fetches a live URL — the page
  * plus its same-origin stylesheets, with the same SSRF hygiene as the web
@@ -39,8 +39,8 @@ const MAX_CSS_FILES = 5;
 const FETCH_TIMEOUT_MS = 10000;
 
 const HELP = `Usage:
-  node bin/deslop.js report <path-or-url> [--out report.html] [--client "Client Name"] [--site "Site Name"]
-  node bin/deslop-report.js <path-or-url> [same options]
+  deslop report <path-or-url> [--out report.html] [--client "Client Name"] [--site "Site Name"]
+  (from source: node bin/deslop-report.js <path-or-url> [same options])
 
 Writes a single self-contained HTML audit report (print/PDF friendly).
 Exit code 0 when the report is written, 2 on usage or fetch errors.`;
@@ -61,13 +61,22 @@ function cap(s) {
 
 /**
  * The checker's fix prompts are written to paste into an AI builder
- * ("In my website, remove the gradient…"). In a report the same text reads
- * as a recommendation once that framing is stripped.
+ * ("In my website, remove the gradient…"). In a report the same text
+ * reads as a recommendation once that framing is stripped — and the
+ * builder's first person goes with it: a client report speaks in the
+ * auditor's neutral voice ("the brand", not "my brand"). Only the
+ * report neutralises; the web checker's copy stays first person,
+ * because there it is pasted verbatim into the builder.
  */
 function asRecommendation(fixText) {
   let t = String(fixText).trim();
-  const prefix = "In my website, ";
-  if (t.startsWith(prefix)) t = t.slice(prefix.length);
+  t = t.replace(/^In my website(?:'s styles| copy)?,\s*/i, "");
+  t = t.replace(/\bmy brand\b/gi, "the brand");
+  t = t.replace(/\bmy palette\b/gi, "the palette");
+  t = t.replace(/\bmy actual product or service\b/gi, "the actual product or service");
+  t = t.replace(/\bmy product\b/gi, "the product");
+  t = t.replace(/\bwhat I offer\b/gi, "what the business offers");
+  t = t.replace(/\bmy\b/gi, "the");
   return cap(t);
 }
 
@@ -346,11 +355,16 @@ function scanPathTarget(target) {
     }
     findings.push(...scanContent(content, path.extname(file), label));
   }
+  const isFile = fs.statSync(resolved).isFile();
   return {
     findings,
     sources: files.map((f) => path.basename(f)),
     defaultSite: path.basename(resolved),
-    scope: `${target} — ${files.length} file(s) scanned`,
+    // Friendly source label, never a raw absolute path: a report handed
+    // to a client should not leak the auditor's temp directories.
+    scope: isFile
+      ? `${path.basename(resolved)} (local file)`
+      : `${path.basename(resolved) || target} (local folder) — ${files.length} file(s) scanned`,
   };
 }
 
@@ -549,7 +563,7 @@ function renderReport({ siteName, clientName, dateStr, scope, findings }) {
   const fails = findings.filter((f) => f.severity === "fail");
   const warns = findings.filter((f) => f.severity !== "fail");
   const score = Math.min(100, fails.length * FAIL_POINTS + warns.length * WARN_POINTS);
-  const verdictKey = score <= 15 ? "clean" : score <= 45 ? "mild" : "heavy";
+  const verdictKey = score === 0 ? "clean" : score <= 45 ? "mild" : "heavy";
   const verdict = verdictKey === "clean" ? "Clean" : verdictKey === "mild" ? "Mild" : "Heavy Slop";
   const rtl = findings.filter((f) => isRtlRule(f.rule));
   const summary = findings.length === 0 ? SUMMARY.spotless : SUMMARY[verdictKey];
@@ -587,7 +601,7 @@ function renderReport({ siteName, clientName, dateStr, scope, findings }) {
       </div>
     </div>
     <div class="scorebar"><div class="scorebar-fill fill-${verdictKey}" style="width: ${score}%"></div></div>
-    <p class="scorebar-note">Slop Score = must-fix findings × ${FAIL_POINTS} + other findings × ${WARN_POINTS}, capped at 100. Higher means more AI-template tells. 0–15 Clean · 16–45 Mild · 46+ Heavy Slop.</p>
+    <p class="scorebar-note">Slop Score = must-fix findings × ${FAIL_POINTS} + other findings × ${WARN_POINTS}, capped at 100. Higher means more AI-template tells. 0 Clean · 1–45 Mild · 46+ Heavy Slop.</p>
     <p class="summary-text">${esc(summary)}</p>
   </section>`);
 
@@ -603,7 +617,7 @@ function renderReport({ siteName, clientName, dateStr, scope, findings }) {
     parts.push(`
   <section>
     <h2>Findings</h2>
-    <div class="clean-box"><strong>No findings to report.</strong> The full deslop rule set (40 rules, including the RTL pack) ran over the scanned sources and nothing fired. Keep doing whatever produced this.</div>
+    <div class="clean-box"><strong>No findings to report.</strong> The full deslop rule set (48 rules, including the RTL pack) ran over the scanned sources and nothing fired. Keep doing whatever produced this.</div>
   </section>`);
   } else {
     if (fails.length > 0) {

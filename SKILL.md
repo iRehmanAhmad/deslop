@@ -18,13 +18,14 @@ After creating or editing any UI file, and **before** telling the user the
 work is complete, run the scanner over the changed area:
 
 ```bash
-node bin/deslop.js ./src            # or the folder you touched
-node bin/deslop.js ./src --format json
+deslop ./src            # or the folder you touched
+deslop ./src --format json
 ```
 
-(If the project does not vendor `bin/deslop.js`, clone
-https://github.com/iRehmanAhmad/deslop and run its `bin/deslop.js` against
-the project path.)
+(If `deslop` is not installed: `npm install -g @irehmanahmad/deslop`.
+Or clone https://github.com/iRehmanAhmad/deslop and run its
+`bin/deslop.js` against the project path — same commands, with
+`node bin/deslop.js` in place of `deslop`.)
 
 Then:
 

@@ -3,8 +3,8 @@
  * deslop-twins — Visual Twins: fingerprint a page's layout + style
  * signature and rank how similar it is to other pages.
  *
- *   node bin/deslop.js twins <url-or-path> [--corpus <dir>] [--json]
- *   node bin/deslop-twins.js <url-or-path> [same options]
+ *   deslop twins <url-or-path> [--corpus <dir>] [--json]
+ *   (from source: node bin/deslop-twins.js <url-or-path> [same options])
  *
  * The fingerprint is computed from SOURCE (fetched HTML + same-origin CSS,
  * or a local HTML file + its local stylesheets) — no headless browser, no
@@ -31,8 +31,13 @@
  * Honest limits: this compares source signatures, not rendered pixels.
  * Two pages can share a fingerprint and still look different in detail,
  * and a page built entirely from a JS framework's runtime styles can
- * fingerprint "thinner" than it renders. Treat the score as "how much of
- * the same template DNA", not a visual diff.
+ * fingerprint "thinner" than it renders. For URL targets the fetcher
+ * also pulls up to 3 same-origin script assets (after the stylesheets),
+ * because SPA bundles carry the design tokens as strings; and when a
+ * fingerprint still comes back nearly empty (no sections, <2 palette
+ * colours, no fonts) the output leads with a THIN FINGERPRINT notice
+ * instead of presenting bare percentages. Treat the score as "how much
+ * of the same template DNA", not a visual diff.
  *
  * URL fetching reuses the web checker's approach (same code lineage as
  * bin/deslop-report.js): public http(s) only, private addresses refused,
@@ -53,8 +58,8 @@ const MAX_CSS_FILES = 5;
 const FETCH_TIMEOUT_MS = 10000;
 
 const HELP = `Usage:
-  node bin/deslop.js twins <url-or-path> [--corpus <dir>] [--json]
-  node bin/deslop-twins.js <url-or-path> [same options]
+  deslop twins <url-or-path> [--corpus <dir>] [--json]
+  (from source: node bin/deslop-twins.js <url-or-path> [same options])
 
 Fingerprints the page (layout skeleton, section pattern, palette, fonts,
 radius/shadows) and ranks its "layout twins" from the built-in archetype
@@ -436,6 +441,27 @@ function fingerprint(html, cssText) {
   };
 }
 
+/**
+ * Thin-fingerprint assessment. A fingerprint is "thin" when the source
+ * carried almost no design information at all: no sections recognised,
+ * fewer than 2 palette colours, and no fonts declared. That is the
+ * signature of a JS-rendered page whose design lives at runtime, not in
+ * its source. Similarity percentages computed from a thin fingerprint
+ * are noise, and the output must say so — never present a bare %.
+ */
+function thinAssessment(fp) {
+  const reasons = [];
+  if (!fp.sections || fp.sections.length === 0) reasons.push("no page sections recognised");
+  if (!fp.palette || fp.palette.length < 2) reasons.push("fewer than 2 palette colours found");
+  if (!fp.fonts || fp.fonts.length === 0) reasons.push("no fonts declared");
+  return { thin: reasons.length === 3, reasons };
+}
+
+const THIN_NOTICE =
+  "this page appears to be JavaScript-rendered — its source carries almost no design " +
+  "information, so this fingerprint is thin and the similarity percentages are unreliable. " +
+  "Treat them as a hint, not a measurement.";
+
 /* ------------------------------------------------------------------ */
 /* Similarity                                                          */
 /* ------------------------------------------------------------------ */
@@ -781,6 +807,7 @@ function stylesheetUrls(html, baseUrl) {
   return out;
 }
 
+/** Generic capped text fetch (stylesheets, and script assets below). */
 async function fetchStylesheet(u) {
   try {
     const resp = await fetch(u.toString(), {
@@ -793,6 +820,24 @@ async function fetchStylesheet(u) {
   } catch {
     return null;
   }
+}
+
+/** Same-origin <script src> assets, in document order. */
+function scriptUrls(html, baseUrl) {
+  const out = [];
+  const seen = new Set();
+  for (const tag of html.match(/<script\b[^>]*>/gi) || []) {
+    const m = tag.match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+    if (!m) continue;
+    let u;
+    try { u = new URL(m[1], baseUrl); } catch { continue; }
+    if (u.origin !== baseUrl.origin) continue;
+    if (u.protocol !== "http:" && u.protocol !== "https:") continue;
+    if (seen.has(u.toString())) continue;
+    seen.add(u.toString());
+    out.push(u);
+  }
+  return out;
 }
 
 /* ------------------------------------------------------------------ */
@@ -813,6 +858,21 @@ async function fingerprintUrl(raw) {
   for (const u of stylesheetUrls(page.html, page.finalUrl)) {
     const css = await fetchStylesheet(u);
     if (css) sheets.push(css);
+  }
+  // JS-rendered pages (React/Vue SPA shells) carry almost no design in
+  // the HTML itself — but the bundle they link holds the design tokens
+  // as strings: hex colours, font names, radius values, utility class
+  // names. Pull up to 3 same-origin script assets (after the
+  // stylesheets) and include their text in the palette/font/radius
+  // extraction, so an SPA fingerprint is not just its empty shell.
+  let scriptsFetched = 0;
+  for (const u of scriptUrls(page.html, page.finalUrl)) {
+    if (scriptsFetched >= 3) break;
+    const js = await fetchStylesheet(u);
+    if (js) {
+      sheets.push(js);
+      scriptsFetched += 1;
+    }
   }
   return {
     fingerprint: fingerprint(page.html, sheets.join("\n")),
@@ -888,6 +948,12 @@ function builtinCorpus() {
 /* ------------------------------------------------------------------ */
 
 function printResult(target, fp, twins) {
+  const thin = thinAssessment(fp);
+  if (thin.thin) {
+    console.log(`⚠ THIN FINGERPRINT — ${THIN_NOTICE}`);
+    console.log(`  Missing signals: ${thin.reasons.join(" · ")}`);
+    console.log("");
+  }
   console.log(`deslop twins: fingerprint for ${target}`);
   console.log(`  skeleton: ${fp.skeleton.id} — ${fp.skeleton.string || "(no landmarks)"}` +
     ` · ${fp.skeleton.divs} divs · max depth ${fp.skeleton.maxDepth}`);
@@ -985,20 +1051,27 @@ async function run(argv) {
     .sort((a, b) => b.score - a.score);
 
   if (json) {
-    console.log(JSON.stringify({
+    const thin = thinAssessment(got.fingerprint);
+    const out = {
       tool: "deslop-twins",
       target: got.label,
       fingerprint: got.fingerprint,
+      thinFingerprint: thin.thin,
       weights: WEIGHTS,
       twins,
-    }, null, 2));
+    };
+    if (thin.thin) {
+      out.thinReasons = thin.reasons;
+      out.notice = THIN_NOTICE;
+    }
+    console.log(JSON.stringify(out, null, 2));
   } else {
     printResult(got.label, got.fingerprint, twins);
   }
   return 0;
 }
 
-module.exports = { run, fingerprint, similarity, loadCorpusDir, builtinCorpus };
+module.exports = { run, fingerprint, similarity, loadCorpusDir, builtinCorpus, thinAssessment };
 
 if (require.main === module) {
   run(process.argv.slice(2)).then(

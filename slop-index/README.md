@@ -10,7 +10,7 @@ site, and grades it with the same machinery as the rest of deslop:
 
 - **Slop Score** — the launch page plus its same-origin stylesheets, scanned
   by the deslop rule engine: `min(100, fails × 12 + warns × 4)`, verdicts
-  0–15 Clean, 16–45 Mild, 46+ Heavy Slop.
+  0 Clean, 1–45 Mild, 46+ Heavy Slop.
 - **Top layout twin** — the site's Visual Twins fingerprint compared against
   the built-in 10-archetype corpus, with the best match and its similarity.
 

@@ -167,7 +167,9 @@ icon system.
 **Fix:** a designed list marker, or restructure the list.
 
 ### `em-dash-overuse`
-**What:** 4+ em-dashes (—) in one UI file.
+**What:** 4+ em-dashes (—) in one UI file. Em-dashes inside long prose
+blocks (a `<p>` or `<article>` carrying more than ~40 words) do not
+count — the rule measures UI copy, not essays.
 **Why:** one em-dash is style; a page full of them is a fingerprint.
 **Fix:** vary punctuation — full stops, colons, commas.
 
@@ -240,6 +242,12 @@ Serif, Fraunces, Playfair Display, Cormorant, EB Garamond) in a font
 stack or loaded from Google Fonts. Cream is only counted in background
 declarations, inline styles and `bg-[#…]` classes — never in
 custom-property definitions, because a palette token is a decision.
+Editorial exemption: a page with strong long-form markers — 300+ words
+of prose in `<p>`/`<article>` blocks, or byline / `<time datetime>` /
+drop-cap / dateline furniture — is read as a genuine magazine, and the
+combo alone does not fire there; a third default signal (a sage accent,
+or the badge pill over the hero) completes the template anyway and
+lifts the exemption.
 **Why:** this pairing is the 2026 AI default look — the combo that
 quietly replaced the purple gradient.
 **Fix:** break the combo decisively: keep the cream and set display type
@@ -415,3 +423,22 @@ whose reader writes dates the other way round; it is the RTL cousin of
 shipping lorem ipsum — a placeholder habit left in production copy.
 **Fix:** format dates at runtime with `Intl.DateTimeFormat('ur')` /
 `('ar')` so order, month names and digits localise.
+
+## Waivers
+
+Any finding can be waived where it lives, in any comment syntax:
+
+```
+<!-- deslop-ignore: lorem-ipsum — placeholder copy kept for the client review draft -->
+```
+
+The waiver covers findings on its own line and on the lines directly
+above and below it — so a standalone comment placed directly above the
+block it waives works, as does a trailing comment on the offending line
+itself. Several rules can be listed comma-separated. The reason is
+required: a `deslop-ignore` without one (a spaced `—`, `–` or `-`
+followed by text) suppresses nothing and is itself reported as a
+`deslop-waiver-no-reason` warning. Waived findings are counted in the
+scan footer, so a waiver is a visible decision, not a hiding place.
+Project-wide suppression lives in `deslop.config.json` (`ignore`,
+`ignoreFiles`, `failOn`) — see "Config & waivers" in the README.

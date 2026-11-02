@@ -30,7 +30,7 @@
  *   is duplicated here rather than exported and refactored under it.
  * - Slop Score formula and verdict bands are the ones from
  *   bin/deslop-report.js: min(100, fails*12 + warns*4);
- *   0–15 Clean, 16–45 Mild, 46+ Heavy Slop.
+ *   0 Clean, 1–45 Mild, 46+ Heavy Slop.
  */
 "use strict";
 
@@ -294,7 +294,7 @@ async function latestShowLaunches(limit) {
 /* ------------------------------------------------------------------ */
 
 function verdictFor(score) {
-  return score <= 15 ? "Clean" : score <= 45 ? "Mild" : "Heavy Slop";
+  return score === 0 ? "Clean" : score <= 45 ? "Mild" : "Heavy Slop";
 }
 
 async function scanLaunch(launch, corpus) {
@@ -408,8 +408,8 @@ async function main(argv) {
     source: "Hacker News API — /v0/showstories.json (https://hacker-news.firebaseio.com)",
     method:
       "Each launch site (page + up to 5 same-origin stylesheets) is scanned with the " +
-      "deslop engine; Slop Score = min(100, fails*12 + warns*4); verdicts 0–15 Clean, " +
-      "16–45 Mild, 46+ Heavy Slop; top twin = highest Visual Twins similarity against " +
+      "deslop engine; Slop Score = min(100, fails*12 + warns*4); verdicts 0 Clean, " +
+      "1–45 Mild, 46+ Heavy Slop; top twin = highest Visual Twins similarity against " +
       "the built-in 10-archetype corpus.",
     requested: limit,
     launchesFound: launches.length,

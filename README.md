@@ -12,6 +12,22 @@ not thinking about your product*.
 those patterns in your source files and reports them — with the file, the
 line, and how to fix it — *before* the agent calls the UI done.
 
+## Try it in 10 seconds
+
+- **In the browser:** [deslop-checker.rehmanahmad.com](https://deslop-checker.rehmanahmad.com) — paste a URL, get a Slop Score + a fix prompt per finding.
+- **As an agent skill:** `npx skills add iRehmanAhmad/deslop`
+- **As a CLI:** `deslop ./src` — one scan of your UI source (from a clone of this repo: `node bin/deslop.js ./src`).
+
+What a scan looks like (real output, trimmed — the full sample is under [Example](#example)):
+
+```text
+$ deslop fixtures/sloppy.html
+sloppy.html:8  [FAIL] inter-only-font — Inter is the only named font in the stack — the default AI typeface
+sloppy.html:12  [FAIL] purple-blue-gradient — Purple/violet-to-blue linear gradient — the default AI hero look
+...
+deslop: scanned 1 file(s) — 5 fail, 34 warning(s)
+```
+
 ## No code? Check any live site in the browser
 
 **[deslop-checker.rehmanahmad.com](https://deslop-checker.rehmanahmad.com)** —
@@ -88,9 +104,15 @@ every archetype. Assertions live in
 **Honest limits:** this is a source-signature comparison, not a
 screenshot diff and not ML. Two pages can share a fingerprint and still
 differ in detail, and a page whose styles are generated entirely at
-runtime by a JS framework will fingerprint thinner than it renders. Read
-the score as "how much of the same template DNA", not "how identical it
-looks".
+runtime by a JS framework will fingerprint thinner than it renders. For
+URL targets the fetcher also pulls up to 3 same-origin script assets
+(after the stylesheets), because SPA bundles carry the design tokens as
+strings — and when a fingerprint still comes back nearly empty (no
+sections recognised, fewer than 2 palette colours, no fonts), the
+output leads with a **THIN FINGERPRINT** warning (and a
+`thinFingerprint: true` field in `--json`) instead of presenting bare
+percentages. Read the score as "how much of the same template DNA", not
+"how identical it looks".
 
 ## SlopBench + Slop Index
 
@@ -121,9 +143,10 @@ defaults pack, full detail in
 world: the newest ~20 Show HN launches each run, fetched live, scored,
 fingerprinted, and snapshotted into `slop-index/data/`. First snapshot
 (2026-11-02): **20 launches found, 19 scored, average Slop Score 31.6**;
-sloppiest a word-game launch at 100, cleanest a Linux syscall reference
-at 0; one launch refused the fetch (HTTP 403) and is recorded as a
-failure, not skipped. Weekly runs turn the snapshots into a trend — and
+two launches tied at the top at 100 — a word game, and a GitHub repo
+page (whose 100 grades GitHub's own page furniture, not the maker's
+design) — cleanest a Linux syscall reference at 0; one launch refused
+the fetch (HTTP 403) and is recorded as a failure, not skipped. Weekly runs turn the snapshots into a trend — and
 their fingerprints into a corpus of real-world layout twins.
 
 ## For teachers: the Spot the Slop kit
@@ -176,9 +199,9 @@ positive. Try it: `fixtures/defaults-2026.html` (all 8 rules fire) vs
 `fixtures/defaults-2026-clean.html` (warm paper and numbered steps,
 chosen on purpose — 0 findings).
 
-## The RTL pack — the blind spot every other scanner has
+## The RTL pack — a blind spot in the rest of the canon
 
-**deslop is the first anti-slop scanner that can read RTL.** The whole
+**deslop is the first anti-slop scanner we know of that can read RTL.** The whole
 Western anti-slop canon assumes your page is left-to-right and
 Latin-script. Point those tools at an Urdu or Arabic page and they see
 nothing — while the agent that generated it shipped a page with no
@@ -339,8 +362,10 @@ finding where it lives, in any comment syntax:
 <!-- deslop-ignore: lorem-ipsum — placeholder copy kept for the client review draft -->
 ```
 
-The waiver covers its own line and the line above it, can list several
-rules comma-separated, and **the reason is required**: a
+The waiver covers its own line and the lines directly above and below
+it — so the standalone comment above a block, as in the example, works.
+It can list several rules comma-separated, and **the reason is
+required**: a
 `deslop-ignore` without one suppresses nothing and is itself reported as
 a `deslop-waiver-no-reason` warning. Waived findings are counted in the
 scan footer (`deslop: 3 finding(s) waived by inline waivers`), so a

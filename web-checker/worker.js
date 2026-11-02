@@ -11,7 +11,7 @@
  * sync-engine.js — bin/deslop.js is the one source of truth.
  *
  * Slop Score: slop = min(100, fails*12 + warns*4). Higher = more slop.
- * Verdicts: 0-15 Clean · 16-45 Mild · 46+ Heavy Slop.
+ * Verdicts: 0 Clean · 1-45 Mild · 46+ Heavy Slop.
  */
 import { scanContent } from "./engine.js";
 
@@ -555,7 +555,7 @@ async function handleCheck(request) {
   const fails = all.filter((f) => f.severity === "fail").length;
   const warns = all.length - fails;
   const score = Math.min(100, fails * FAIL_POINTS + warns * WARN_POINTS);
-  const verdict = score <= 15 ? "Clean" : score <= 45 ? "Mild" : "Heavy Slop";
+  const verdict = score === 0 ? "Clean" : score <= 45 ? "Mild" : "Heavy Slop";
 
   return jsonResponse({
     ok: true,
@@ -828,7 +828,7 @@ function copyPrompt(text, button) {
 function renderResults(data) {
   results.innerHTML = "";
   var block = el("div", "score-block");
-  var cls = data.score <= 15 ? "score-clean" : (data.score <= 45 ? "score-mild" : "score-heavy");
+  var cls = data.score === 0 ? "score-clean" : (data.score <= 45 ? "score-mild" : "score-heavy");
   var num = el("div", "score-num " + cls, String(data.score));
   var small = el("small", null, " / 100");
   num.appendChild(small);

@@ -8,27 +8,32 @@
  * workflow" copy, and friends.
  *
  * Usage:
- *   node bin/deslop.js [path] [--format text|json]
- *   node bin/deslop.js report <path-or-url> [--out file] [--client N] [--site N]
+ *   deslop [path] [--format text|json]
+ *   deslop report <path-or-url> [--out file] [--client N] [--site N]
  *     (report mode lives in bin/deslop-report.js and writes a client-facing
  *      HTML audit report; see that file for details)
- *   node bin/deslop.js twins <url-or-path> [--corpus dir] [--json]
+ *   deslop twins <url-or-path> [--corpus dir] [--json]
  *     (twins mode lives in bin/deslop-twins.js and fingerprints a page's
  *      layout + style signature, ranking its "layout twins"; see that file)
- *   node bin/deslop.js install [--claude] [--cursor] [--dry-run]
+ *   deslop install [--claude] [--cursor] [--dry-run]
  *     (install mode lives in bin/deslop-install.js and copies SKILL.md into
  *      .claude/skills, ~/.claude/skills and optionally .cursor/rules)
+ *   From source (this repo), run any of these as `node bin/deslop.js …`.
  *
  * A deslop.config.json in the scanned root (or the cwd) can ignore rules,
  * skip files, and change the exit-code policy — see "Config & waivers" in
  * README.md. Individual findings can be waived inline with a reason:
  *   deslop-ignore: <rule-id> — <why this one is deliberate>
  * (HTML/CSS/JS comment syntax all work; the waiver covers its own line and
- * the line above it. A waiver without a reason suppresses nothing and is
- * itself reported as a `deslop-waiver-no-reason` warning.)
+ * the lines directly above and below it, so a standalone comment placed
+ * above the block it waives works. A waiver without a reason suppresses
+ * nothing and is itself reported as a `deslop-waiver-no-reason` warning.)
  *
- * - path defaults to ./src when it exists, otherwise the current directory.
- * - Exit code is 1 when any "fail" rule hits, 0 otherwise.
+ * - With options but no path, path defaults to ./src when it exists,
+ *   otherwise the current directory. With no arguments at all, usage is
+ *   printed instead of scanning.
+ * - Exit code is 1 when any "fail" rule hits, 0 otherwise, 2 on usage
+ *   errors (unknown option/command, missing path, nothing scanned).
  *
  * Requires Node >= 18. No npm packages.
  */
@@ -520,7 +525,35 @@ const FILE_RULES = [
     threshold: 4,
     message: (n) => `Em-dash used ${n} times in UI copy — the punctuation equivalent of the purple gradient`,
     hint: "Vary the punctuation: full stops, colons, commas. One em-dash is style; ten is a fingerprint.",
-    count: (lines) => lines.reduce((acc, l) => acc + (l.match(/—/g) || []).length, 0),
+    // The rule measures UI copy, not essays: em-dashes inside a long
+    // prose block (a <p> or <article> carrying more than 40 words of
+    // text) are excluded — a magazine article's punctuation is an
+    // author's style, not a template tell.
+    count: (lines, content) => {
+      const total = (content.match(/—/g) || []).length;
+      const blocks = [];
+      const blockRe = /<(p|article)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+      let m;
+      while ((m = blockRe.exec(content)) !== null) {
+        const text = m[2].replace(/<[^>]+>/g, " ");
+        const words = text.split(/\s+/).filter(Boolean).length;
+        blocks.push({
+          start: m.index, end: m.index + m[0].length, words,
+          dashes: (m[2].match(/—/g) || []).length,
+        });
+      }
+      // Outermost blocks first, so an <article> and the <p>s inside it
+      // are never both subtracted.
+      blocks.sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start));
+      let excluded = 0;
+      let coveredUntil = -1;
+      for (const b of blocks) {
+        if (b.start < coveredUntil) continue;
+        coveredUntil = b.end;
+        if (b.words > 40) excluded += b.dashes;
+      }
+      return Math.max(0, total - excluded);
+    },
   },
   {
     id: "text-center-everywhere",
@@ -711,8 +744,58 @@ function defaults2026Findings(lines, content, rel, ext, prior) {
     }
   });
 
+  // Badge pill above the hero headline — computed here because it is
+  // also the "third signal" that can complete the 2026 combo below.
+  let badgeHit = null;
+  if (MARKUP_EXTENSIONS.has(ext)) {
+    const h1 = content.search(/<h1[\s>]/i);
+    if (h1 > 0) {
+      const before = content.slice(0, h1);
+      const elRe = /<(span|div|a|p|small)\b[^>]*?class\s*=\s*["']([^"']*)["'][^>]*>([^<]{1,60})<\//gi;
+      let m;
+      while ((m = elRe.exec(before)) !== null) {
+        const text = m[3].trim();
+        if (!text) continue;
+        const tokens = m[2].toLowerCase().split(/\s+/);
+        const named = tokens.some((t) => /^(badge|pill|chip)(-|$)/.test(t));
+        const round = tokens.includes("rounded-full") && text.length <= 40;
+        if (named || round) {
+          badgeHit = {
+            line: before.slice(0, m.index).split("\n").length,
+            text,
+          };
+          break;
+        }
+      }
+    }
+  }
+
+  // Editorial exemption: cream + a serif display face is ALSO what a
+  // real magazine looks like, and the combo alone cannot tell a
+  // literary page from the template. A page carrying strong long-form
+  // markers — substantial prose in <p>/<article> blocks (300+ words),
+  // or byline / date / drop-cap furniture — is read as editorial, and
+  // the combo by itself does not fire there. A third default signal
+  // (a sage accent, or the badge pill over the hero) completes the
+  // template anyway and lifts the exemption.
+  let editorial = false;
+  if (MARKUP_EXTENSIONS.has(ext)) {
+    let proseWords = 0;
+    const pRe = /<(?:p|article)\b[^>]*>([\s\S]*?)<\/(?:p|article)>/gi;
+    let pm;
+    while ((pm = pRe.exec(content)) !== null) {
+      proseWords += pm[1].replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length;
+    }
+    const markers =
+      /\bbyline\b/i.test(content) ||
+      /<time\b[^>]*\bdatetime\s*=/i.test(content) ||
+      /\bdrop-?cap\b/i.test(content) ||
+      /\bdateline\b/i.test(content);
+    editorial = proseWords > 300 || markers;
+  }
+
   /* --- cream-serif-default: the combo is the tell -------------------- */
-  if (creamLine && serifLine) {
+  if (creamLine && serifLine && (!editorial || sageLine || badgeHit)) {
     push(creamLine, "cream-serif-default",
       "Cream background + serif display type — the 2026 AI default look, the combo that quietly replaced the purple gradient",
       "Break the combo decisively: keep the cream and set the display type in a grotesque with character, or keep the serif and give the page a real colour story. Changing neither is the template.");
@@ -780,26 +863,10 @@ function defaults2026Findings(lines, content, rel, ext, prior) {
   }
 
   /* --- hero-badge-pill ------------------------------------------------ */
-  if (MARKUP_EXTENSIONS.has(ext)) {
-    const h1 = content.search(/<h1[\s>]/i);
-    if (h1 > 0) {
-      const before = content.slice(0, h1);
-      const elRe = /<(span|div|a|p|small)\b[^>]*?class\s*=\s*["']([^"']*)["'][^>]*>([^<]{1,60})<\//gi;
-      let m;
-      while ((m = elRe.exec(before)) !== null) {
-        const text = m[3].trim();
-        if (!text) continue;
-        const tokens = m[2].toLowerCase().split(/\s+/);
-        const named = tokens.some((t) => /^(badge|pill|chip)(-|$)/.test(t));
-        const round = tokens.includes("rounded-full") && text.length <= 40;
-        if (named || round) {
-          push(before.slice(0, m.index).split("\n").length, "hero-badge-pill",
-            `Badge pill floating above the hero headline ("${text}") — the "✦ Introducing…" default`,
-            "If the news is real, put it in the headline or a dated changelog entry. A pill above the H1 that says 'New' or 'AI-powered' is decoration dressed as news.");
-          break;
-        }
-      }
-    }
+  if (badgeHit) {
+    push(badgeHit.line, "hero-badge-pill",
+      `Badge pill floating above the hero headline ("${badgeHit.text}") — the "✦ Introducing…" default`,
+      "If the news is real, put it in the headline or a dated changelog entry. A pill above the H1 that says 'New' or 'AI-powered' is decoration dressed as news.");
   }
 
   /* --- left-border-accent-card ---------------------------------------- */
@@ -1064,8 +1131,10 @@ function fileIgnoredByGlobs(file, globs, rootDir) {
  *
  * works inside any comment syntax (<!-- -->, /* *\/, //) because the token
  * is matched in the raw line text. A waiver covers findings on its OWN
- * line and the line ABOVE it (so it can sit trailing on the line after a
- * declaration block as well as trailing on the offending line itself).
+ * line, the line ABOVE it and the line BELOW it — so it can sit trailing
+ * on the offending line itself, on the line after a declaration block,
+ * or as a standalone comment directly above the block it waives (the
+ * pattern the README documents).
  * The reason is REQUIRED: the rule list must be followed by a spaced
  * em dash (—), en dash (–) or hyphen (-) and non-empty text. A waiver
  * without a reason suppresses nothing and is returned as a problem.
@@ -1093,7 +1162,7 @@ function parseWaivers(content) {
       problems.push({ line: lineNo, rules });
       return;
     }
-    for (const ln of [lineNo, lineNo - 1]) {
+    for (const ln of [lineNo, lineNo - 1, lineNo + 1]) {
       if (ln < 1) continue;
       if (!covered.has(ln)) covered.set(ln, new Set());
       for (const r of rules) covered.get(ln).add(r);
@@ -1105,6 +1174,28 @@ function parseWaivers(content) {
 /* ------------------------------------------------------------------ */
 /* Main                                                                */
 /* ------------------------------------------------------------------ */
+
+function printHelp() {
+  console.log("Usage:");
+  console.log("  deslop [path] [--format text|json]");
+  console.log("  deslop report <path-or-url> [--out report.html] [--client \"Name\"] [--site \"Name\"]");
+  console.log("    report writes a client-facing HTML audit report (see bin/deslop-report.js)");
+  console.log("  deslop twins <url-or-path> [--corpus <dir>] [--json]");
+  console.log("    twins fingerprints a page's layout + style and ranks its layout twins (see bin/deslop-twins.js)");
+  console.log("  deslop install [--claude] [--cursor] [--dry-run]");
+  console.log("    install copies the deslop agent skill into .claude/skills, ~/.claude/skills (and .cursor/rules with --cursor)");
+  console.log("");
+  console.log("With options but no path, the scan path defaults to ./src when it");
+  console.log("exists, otherwise the current directory. With no arguments at all,");
+  console.log("this usage text is printed instead of scanning.");
+  console.log("");
+  console.log("Config: a deslop.config.json in the scanned root or cwd supports");
+  console.log('  { "ignore": ["rule-id"], "ignoreFiles": ["glob"], "failOn": "fail" | "any" }');
+  console.log("Inline waiver: deslop-ignore: <rule-id> — <reason>");
+  console.log("  (covers the waiver's own line and the lines directly above and below it).");
+  console.log("");
+  console.log("From source (this repo), run any command as `node bin/deslop.js …`.");
+}
 
 function main(argv) {
   const args = argv.slice(2);
@@ -1130,28 +1221,38 @@ function main(argv) {
     return require("./deslop-install.js").run(args.slice(1));
   }
 
+  // No arguments at all: print usage. Silently scanning the cwd made a
+  // bare `deslop` in the wrong folder look like a clean bill of health.
+  if (args.length === 0) {
+    printHelp();
+    return 0;
+  }
+
   let format = "text";
   let target = null;
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--format") {
-      format = args[++i];
-    } else if (args[i] === "--help" || args[i] === "-h") {
-      console.log("Usage:");
-      console.log("  node bin/deslop.js [path] [--format text|json]");
-      console.log("  node bin/deslop.js report <path-or-url> [--out report.html] [--client \"Name\"] [--site \"Name\"]");
-      console.log("    report writes a client-facing HTML audit report (see bin/deslop-report.js)");
-      console.log("  node bin/deslop.js twins <url-or-path> [--corpus <dir>] [--json]");
-      console.log("    twins fingerprints a page's layout + style and ranks its layout twins (see bin/deslop-twins.js)");
-      console.log("  node bin/deslop.js install [--claude] [--cursor] [--dry-run]");
-      console.log("    install copies the deslop agent skill into .claude/skills, ~/.claude/skills (and .cursor/rules with --cursor)");
-      console.log("");
-      console.log("Config: a deslop.config.json in the scanned root or cwd supports");
-      console.log('  { "ignore": ["rule-id"], "ignoreFiles": ["glob"], "failOn": "fail" | "any" }');
-      console.log("Inline waiver: deslop-ignore: <rule-id> — <reason> (own line + line above).");
+    const a = args[i];
+    if (a === "--format") {
+      const value = args[++i];
+      if (value === undefined) {
+        console.error("deslop: --format needs a value (text or json)");
+        return 2;
+      }
+      format = value;
+    } else if (a === "--help" || a === "-h") {
+      printHelp();
       return 0;
-    } else if (!args[i].startsWith("--")) {
-      target = args[i];
+    } else if (a.startsWith("--")) {
+      // An unknown flag must never be silently ignored: in CI a typo'd
+      // flag would otherwise scan the wrong thing and pass.
+      console.error(`deslop: unknown option "${a}" (run "deslop --help" for usage)`);
+      return 2;
+    } else if (target === null) {
+      target = a;
+    } else {
+      console.error(`deslop: one path at a time (got "${target}" and "${a}")`);
+      return 2;
     }
   }
 
@@ -1166,7 +1267,15 @@ function main(argv) {
   }
   const resolved = path.resolve(target);
   if (!fs.existsSync(resolved)) {
-    console.error(`deslop: path not found: ${target}`);
+    // A bare word with no path separators and no extension is almost
+    // certainly a mistyped subcommand, not a folder — say which
+    // commands exist instead of blaming a path.
+    if (!target.includes("/") && !target.includes("\\") && !target.includes(".")) {
+      console.error(`deslop: unknown command "${target}"`);
+      console.error("commands: deslop [path] (scan) · deslop report <path-or-url> · deslop twins <url-or-path> · deslop install — or give a path to scan (run \"deslop --help\")");
+    } else {
+      console.error(`deslop: path not found: ${target}`);
+    }
     return 2;
   }
 
@@ -1187,6 +1296,21 @@ function main(argv) {
     const kept = files.filter((f) => !fileIgnoredByGlobs(f, config.ignoreFiles, rootDir));
     filesSkipped = files.length - kept.length;
     files = kept;
+  }
+
+  // False-clean guard: a scan that covered nothing must never report
+  // "no AI design slop found" — in the wrong folder that sentence reads
+  // as a clean bill of health for files that were never looked at.
+  if (files.length === 0) {
+    console.error(
+      `deslop: nothing was scanned — 0 files matched under ${target} ` +
+      "(deslop reads .css/.scss/.html/.jsx/.tsx/.vue/.astro/.svelte" +
+      (filesSkipped > 0
+        ? `; ${filesSkipped} file(s) were skipped by ignoreFiles in deslop.config.json`
+        : "") +
+      "). A 'no findings' result here would mean nothing — point deslop at your UI source files."
+    );
+    return 2;
   }
 
   const allFindings = [];

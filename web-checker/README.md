@@ -19,10 +19,10 @@ Live: https://deslop-checker.rehmanahmad.com
     stylesheets (256 KB each),
   - runs the deslop engine over the HTML and CSS,
   - returns JSON: score, verdict, and findings with plain-language copy and
-    fix prompts (hand-written for all 40 rules in `worker.js`'s COPY map;
+    fix prompts (hand-written for all 48 rules in `worker.js`'s COPY map;
     a generic fallback covers any future rule).
 - **Slop Score** = `min(100, fails × 12 + warns × 4)`. Higher = more slop.
-  Verdicts: 0–15 **Clean** · 16–45 **Mild** · 46+ **Heavy Slop**.
+  Verdicts: 0 **Clean** · 1–45 **Mild** · 46+ **Heavy Slop**.
 
 ## Files
 
