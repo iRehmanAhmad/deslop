@@ -211,6 +211,46 @@ const COPY = {
     p: "Dates inside your Urdu/Arabic text are written in the Latin format (like 11/02/2026 or 'November 2, 2026'). The order and the digits do not match how your readers write dates.",
     f: "In my website, format dates inside Urdu/Arabic text using the reader's locale (Intl.DateTimeFormat with 'ur' or 'ar'), so month names, order and digits localise automatically. Never hard-code a date format into the text.",
   },
+  "cream-serif-default": {
+    t: "The 2026 look: cream + fancy serif",
+    p: "Your site pairs a warm cream background with an elegant serif headline font. That exact combo is this year's AI default — the quiet replacement for the purple gradient. Tasteful, but now so common that visitors read it as 'template' at a glance.",
+    f: "In my website, break up the cream-background-plus-serif-headline combination: either keep the cream background and switch the headline font to a characterful sans-serif, or keep the serif headlines and change the background to a colour with a real point of view. Do not keep both halves of the combo.",
+  },
+  "sage-green-accent": {
+    t: "Sage green — the new default accent",
+    p: "Your site uses a muted sage green as its accent colour, together with a cream background or serif type. Sage-on-cream is the third piece of the current AI-template uniform.",
+    f: "In my website, replace the sage/muted-green accent colour with an accent taken from my actual brand or subject — for example a rust, an ink blue, or a stronger green chosen on purpose — and apply it consistently to buttons, links and highlights.",
+  },
+  "replacement-default-font": {
+    t: "The replacement default font",
+    p: "Your site's main font is Space Grotesk, Geist or Instrument Serif — the fonts everyone switched to after Inter became the cliché. Making the same swap as everyone else is the new tell.",
+    f: "In my website, change the main/display font to a typeface chosen for my brand's personality rather than the current fashionable default (not Inter, Space Grotesk, Geist or Instrument Serif), and apply it to the headings and logo.",
+  },
+  "shadcn-fingerprint": {
+    t: "An untouched template kit (shadcn defaults)",
+    p: "Under the surface, your site still uses the stock design settings of the shadcn/Tailwind starter kit — the default colours, spacing and corner radius exactly as they shipped. It is the single most common 'built by AI' fingerprint, even when the page looks calm.",
+    f: "In my website, customise the design tokens of the UI kit instead of using the shipped defaults: change the background, text, primary/accent colours and corner radius values to my brand's own values, everywhere they are defined (for example the CSS variables like --background, --foreground, --primary and --radius).",
+  },
+  "hero-badge-pill": {
+    t: "The little pill above your headline",
+    p: "A small rounded badge ('New', 'Introducing…', 'AI-powered') floats above your main headline. It is the favourite decoration of AI site builders — it looks like news but says nothing.",
+    f: "In my website, remove the small pill/badge above the main headline. If there is real news, work it into the headline itself or add a dated announcement; otherwise leave the headline standing on its own.",
+  },
+  "left-border-accent-card": {
+    t: "Cards with a thick coloured left edge",
+    p: "Your cards and callouts are styled with a thick coloured stripe down the left side. One is an accent; a whole page of them is the current template look.",
+    f: "In my website, restyle the cards that have a thick coloured left border: use a thin full border, a top rule, or a soft background tint instead, and keep just one of those devices across the page.",
+  },
+  "hover-scale-boilerplate": {
+    t: "Everything grows a little on hover",
+    p: "Cards and buttons all swell by the same 5% when hovered (hover:scale-105). It is the stock animation the template adds to everything, so it feels like nothing was actually designed.",
+    f: "In my website, remove the uniform hover grow effect (hover:scale-105 / hover:scale-110) from cards and buttons. Give important elements one deliberate hover response instead, like a colour change or an arrow that moves.",
+  },
+  "numbered-steps-row": {
+    t: "The 01 – 02 – 03 row",
+    p: "Your page has the standard numbered-steps row (01, 02, 03) or a row of big round stats. On template sites these rows exist because the layout had a slot for them — not because the steps or numbers say anything specific.",
+    f: "In my website, make the numbered steps / big stats row earn its place: use my real process steps in their real order, or my true numbers. If the steps or stats are generic, remove the row and replace it with a short paragraph or a real example.",
+  },
 };
 
 /** Same fallback logic as the web checker in worker.js. */

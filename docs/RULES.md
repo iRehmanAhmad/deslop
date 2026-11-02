@@ -1,8 +1,13 @@
 # deslop rules
 
-40 rules: 5 `fail` (block "done" until fixed) and 35 `warn` (fix, or justify
+48 rules: 5 `fail` (block "done" until fixed) and 43 `warn` (fix, or justify
 in one line against the project's design system). Each entry says why the
 pattern reads as AI-generated and how to fix it.
+
+The **2026 defaults pack** (8 rules) hunts the new default look — cream +
+serif + sage, un-themed shadcn tokens, hero badge pills, hover:scale-105 —
+and is deliberately combo-first: single signals are design choices, pairs
+are templates.
 
 The last section is the **RTL pack**: 9 rules for Urdu/Arabic
 (right-to-left) UI that the Western anti-slop canon cannot see, because it
@@ -216,6 +221,101 @@ replacement.
 **Why:** keyboard users lose their place — a real harm hiding inside a
 "clean look" preference.
 **Fix:** style `:focus-visible` with a visible ring.
+
+## 2026 defaults pack — the new default look
+
+The loud early tells (purple gradient, Inter) were replaced by a quieter
+kit, and the data moved with it: in a 3.2M-post study the loudest current
+tells are the un-themed shadcn/Tailwind default kit, then AI purple, then
+the cream + serif + sage combo. These 8 rules are all `warn`, and they are
+combo-first by design — a cream background alone is a paper choice, a
+serif alone is a type choice, and a scanner that convicts single signals
+drowns in false positives. Pairs are templates.
+
+### `cream-serif-default`
+**What:** a cream / warm-white background (the `#faf6ef` family, named
+cream/ivory/parchment tones, or `bg-amber-50`-style warm whites) actually
+painted on the page, together with a serif display face (Instrument
+Serif, Fraunces, Playfair Display, Cormorant, EB Garamond) in a font
+stack or loaded from Google Fonts. Cream is only counted in background
+declarations, inline styles and `bg-[#…]` classes — never in
+custom-property definitions, because a palette token is a decision.
+**Why:** this pairing is the 2026 AI default look — the combo that
+quietly replaced the purple gradient.
+**Fix:** break the combo decisively: keep the cream and set display type
+in a grotesque with character, or keep the serif and give the page a real
+colour story.
+
+### `sage-green-accent`
+**What:** a muted sage/olive green accent (green-dominant, greyed, mid
+lightness — `#a3b18a`, `#588157`, `#5b7553`) appearing alongside a cream
+background or serif display type. Vivid greens and dark grounds are
+deliberately outside the family.
+**Why:** sage is the third member of the 2026 default trio; on its own it
+says nothing, next to cream or a display serif it completes the uniform.
+**Fix:** take the accent from the brand or the subject — muted green over
+cream is the template's signature.
+
+### `replacement-default-font`
+**What:** Space Grotesk, Geist or Instrument Serif as the first (main /
+display) font of a stack.
+**Why:** swapping Inter for one of these became so universal that the
+swap itself is now the tell.
+**Fix:** choose a face for what it says about the brand, not because it
+is the current default alternative. (Inter itself is covered by
+`inter-only-font`; this rule does not duplicate it.)
+
+### `shadcn-fingerprint`
+**What:** evidence of an un-themed shadcn/ui default kit, firing once
+per file: 3 or more stock CSS variables at their default values
+(`--background: 0 0% 100%`, `--foreground: 240 10% 3.9%`,
+`--primary: 240 5.9% 10%`, `--radius: 0.5rem`, …), or the stock
+zinc/slate palette as shipped hexes (4+ shades including the
+foreground/primary anchor pair). When the CLI scans a project
+directory, a `components.json` with a stock `baseColor` (slate, zinc,
+neutral, gray, stone) adds the same finding.
+**Why:** the un-themed kit is the single most common AI-default tell in
+the data — the demo look, shipped.
+**Fix:** theme the tokens (background, foreground, primary, radius) to
+the brand's own values. shadcn is a starting point, not a theme.
+
+### `hero-badge-pill`
+**What:** a small pill/badge element (a `badge`/`pill`/`chip` class, or
+a `rounded-full` element with short text) sitting above the first `<h1>`
+— "✨ Introducing…", "New", "AI-powered". (No earlier rule covered this;
+the eyebrow rule catches uppercase tracking labels, a different device.)
+**Why:** it is decoration dressed as news — the template's favourite hat.
+**Fix:** put real news in the headline or a dated changelog; let the
+headline stand on its own.
+
+### `left-border-accent-card`
+**What:** two or more elements with a thick coloured left border
+(`border-left` of 3px+ solid, `border-l-4`/`border-l-8`,
+`border-l-[3px+]`). One bordered quote is a style; two or more is a
+system. Does not fire in RTL files — there the accent-edge story
+belongs to the RTL pack.
+**Why:** the coloured-edge card is the new default card treatment.
+**Fix:** a full hairline border, a top rule or a background tint — one
+device per page.
+
+### `hover-scale-boilerplate`
+**What:** `hover:scale-105` / `hover:scale-110` (or the arbitrary-value
+spellings) sprinkled on cards and buttons.
+**Why:** a uniform 5% swell on everything is the template's reflex, not
+a designed response.
+**Fix:** give hover something to say — a colour shift, an underline, an
+arrow that moves.
+
+### `numbered-steps-row`
+**What:** the "01 / 02 / 03" numbered-steps row (or "Step 1/2/3", or a
+row of 3+ big-number stats) — but only when the same file already
+carries other generic landing-page findings (`generic-cta`,
+`ai-copy-words`, `eyebrow-label`, `generic-social-proof`,
+`inter-only-font`). Swiss grids and workshop catalogues number things
+honestly; the row is only a tell when it arrives with the rest of the
+template.
+**Why:** the row usually exists because the template had a slot for it.
+**Fix:** real steps in real order, or true numbers — or cut the row.
 
 ## RTL pack — Urdu & Arabic (right-to-left)
 

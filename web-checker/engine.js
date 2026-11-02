@@ -193,6 +193,13 @@ const LINE_RULES = [
     test: (line) => /transition\s*:\s*all\b/.test(line) || /\btransition-all\b/.test(line),
   },
   {
+    id: "hover-scale-boilerplate",
+    severity: "warn",
+    message: "hover:scale-105/110 — the stock micro-interaction sprinkled on every card and button",
+    hint: "Hover feedback should say something (a colour shift, an underline, an arrow that moves). A uniform 5% swell on everything is the template's reflex, not a choice.",
+    test: (line) => /\bhover:scale-(105|110)\b/.test(line) || /\bhover:scale-\[1\.(05|1)\]/.test(line),
+  },
+  {
     id: "z-index-arms-race",
     severity: "warn",
     message: "z-index of 100 or more — stacking decided by escalation instead of a scale",
@@ -556,6 +563,277 @@ const FILE_RULES = [
 ];
 
 /* ------------------------------------------------------------------ */
+/* 2026 defaults pack — the new default look                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The AI default look moved. The loud early tells (purple-to-blue
+ * gradient, Inter) gave way to a quieter kit: a cream background under
+ * a serif display face with a sage-green accent, an un-themed shadcn
+ * token set shipped untouched, a badge pill floating over the hero,
+ * cards edged with a thick coloured left border, hover:scale-105 on
+ * every card, 01/02/03 step rows and big-stat rows — and Space
+ * Grotesk, Geist or Instrument Serif standing exactly where Inter
+ * stood. These rules are combo-first on purpose: cream alone is a
+ * paper choice and a serif alone is a type choice; together they are
+ * the 2026 template, and a scanner that convicts single signals
+ * drowns in false positives. Everything in this pack is a warn.
+ */
+
+const DISPLAY_SERIFS_2026 = [
+  "instrument serif", "fraunces", "playfair display", "cormorant", "eb garamond",
+];
+const REPLACEMENT_FONTS_2026 = {
+  "space grotesk": "Space Grotesk",
+  "geist": "Geist",
+  "instrument serif": "Instrument Serif",
+};
+
+/**
+ * Warm-white / cream hexes, matched on the first four hex digits so
+ * the family (#faf6ef, #fdfaf3, #fff8e1…) is covered without
+ * enumerating it. Cream is only counted where it is actually painted:
+ * a background declaration, an inline style, or a bg-[#…] class —
+ * never a custom-property definition, because a palette token is a
+ * decision and this pack hunts the un-decided default. Pure white
+ * (#ffffff) and the cool grays are not cream.
+ */
+const CREAM_PREFIXES = new Set([
+  "fff8", "fff9", "fef9", "fefc", "fdf6", "fdf9", "fdfa",
+  "faf5", "faf6", "faf7", "faf8", "faf9", "f7f2", "f7f3",
+  "f6f1", "f8f4", "f8f5", "f9f5", "f9f6",
+]);
+
+function isCreamHex(hex) {
+  return CREAM_PREFIXES.has(hex.toLowerCase().slice(1, 5));
+}
+
+/**
+ * Muted green accent (the sage/olive family — #a3b18a, #588157,
+ * #5b7553): green clearly dominant but greyed, at mid lightness.
+ * Vivid greens (emerald, lime) and dark grounds (deep academia
+ * green) are deliberately outside the family.
+ */
+function isSageHex(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  if (!(g > r && g >= b && g - Math.max(r, b) >= 8)) return false;
+  const lightness = (max + min) / 2 / 255;
+  const saturation = max === min ? 0 : (max - min) / (255 - Math.abs(max + min - 255));
+  return saturation <= 0.45 && lightness >= 0.25 && lightness <= 0.8;
+}
+
+function defaults2026Findings(lines, content, rel, ext, prior) {
+  const out = [];
+  const push = (line, rule, message, hint) =>
+    out.push({ file: rel, line, rule, severity: "warn", message, hint });
+  const stacks = fontStacks(lines);
+
+  /* --- signals ------------------------------------------------------ */
+
+  // Cream background, actually painted on something.
+  let creamLine = 0;
+  const bgRe = /(?:^|[;{"'])\s*background(?:-color)?\s*:\s*([^;}]+)/g;
+  lines.forEach((line, i) => {
+    if (creamLine) return;
+    let m;
+    bgRe.lastIndex = 0;
+    while ((m = bgRe.exec(line)) !== null) {
+      const hex = (m[1].match(/#[0-9a-fA-F]{6}\b/) || [])[0];
+      if ((hex && isCreamHex(hex)) || /\b(cream|ivory|parchment|ecru)\b/i.test(m[1])) {
+        creamLine = i + 1;
+        break;
+      }
+    }
+    if (!creamLine) {
+      const arb = line.match(/\bbg-\[#([0-9a-fA-F]{6})\]/);
+      if ((arb && isCreamHex("#" + arb[1])) || /\bbg-(amber|orange|yellow)-50\b/.test(line)) {
+        creamLine = i + 1;
+      }
+    }
+  });
+
+  // Serif display face — in a font stack, or loaded via Google Fonts
+  // even when the stack itself is a utility class we cannot resolve.
+  let serifLine = 0;
+  for (const s of stacks) {
+    if (stackHas(s, DISPLAY_SERIFS_2026)) { serifLine = s.line; break; }
+  }
+  if (!serifLine) {
+    const idx = lines.findIndex((l) =>
+      /fonts\.googleapis\.com/.test(l) &&
+      DISPLAY_SERIFS_2026.some((f) => l.toLowerCase().replace(/\+/g, " ").includes(f)));
+    if (idx !== -1) serifLine = idx + 1;
+  }
+
+  // Sage-green accents among the file's colour values.
+  let sageLine = 0;
+  let sageSample = "";
+  lines.forEach((line, i) => {
+    for (const hex of line.match(/#[0-9a-fA-F]{6}\b/g) || []) {
+      if (isSageHex(hex)) {
+        if (!sageLine) { sageLine = i + 1; sageSample = hex.toLowerCase(); }
+      }
+    }
+  });
+
+  /* --- cream-serif-default: the combo is the tell -------------------- */
+  if (creamLine && serifLine) {
+    push(creamLine, "cream-serif-default",
+      "Cream background + serif display type — the 2026 AI default look, the combo that quietly replaced the purple gradient",
+      "Break the combo decisively: keep the cream and set the display type in a grotesque with character, or keep the serif and give the page a real colour story. Changing neither is the template.");
+  }
+
+  /* --- sage-green-accent: the third member of the trio --------------- */
+  if (sageLine && (creamLine || serifLine)) {
+    push(sageLine, "sage-green-accent",
+      `Sage-green accent (${sageSample}) alongside ${creamLine ? "a cream background" : "serif display type"} — the third member of the 2026 default trio`,
+      "Sage is the new default accent. Take the accent from the brand or the subject — a rust, an ink blue, a green chosen on purpose. Muted green over cream is the template's signature.");
+  }
+
+  /* --- replacement-default-font -------------------------------------- */
+  for (const s of stacks) {
+    const first = s.named[0] || "";
+    const hit = Object.keys(REPLACEMENT_FONTS_2026)
+      .find((f) => first === f || first.startsWith(f + " "));
+    if (hit) {
+      push(s.line, "replacement-default-font",
+        `${REPLACEMENT_FONTS_2026[hit]} as the main/display font — the post-Inter replacement default`,
+        "Swapping Inter for Space Grotesk, Geist or Instrument Serif is the new tell — everyone made the same swap. Pick a face for what it says about this brand, not because it is the current default alternative.");
+      break;
+    }
+  }
+
+  /* --- shadcn-fingerprint -------------------------------------------- */
+  {
+    const tokenRes = [
+      /--background\s*:\s*0\s+0%\s+100%/,
+      /--foreground\s*:\s*(?:222\.2\s+84%\s+4\.9%|240\s+10%\s+3\.9%)/,
+      /--primary\s*:\s*(?:222\.2\s+47\.4%\s+11\.2%|240\s+5\.9%\s+10%)/,
+      /--muted\s*:\s*(?:210\s+40%\s+96\.1%|240\s+4\.8%\s+95\.9%)/,
+      /--border\s*:\s*(?:214\.3\s+31\.8%\s+91\.4%|240\s+5\.9%\s+90%)/,
+      /--ring\s*:\s*(?:222\.2\s+84%\s+4\.9%|240\s+5%\s+64\.9%)/,
+      /--card\s*:\s*0\s+0%\s+100%/,
+      /--radius\s*:\s*0\.5rem\b/,
+    ];
+    let tokenCount = 0;
+    let tokenLine = 0;
+    for (const re of tokenRes) {
+      const idx = lines.findIndex((l) => re.test(l));
+      if (idx !== -1) { tokenCount += 1; if (!tokenLine) tokenLine = idx + 1; }
+    }
+    // The stock neutral ramps as shipped hexes. A fingerprint needs the
+    // ramp AND its anchor pair (foreground/primary) — four loose zinc
+    // shades on their own are just grayscale.
+    const ZINC = ["#fafafa", "#f4f4f5", "#e4e4e7", "#d4d4d8", "#a1a1aa",
+      "#71717a", "#52525b", "#3f3f46", "#27272a", "#18181b", "#09090b"];
+    const SLATE = ["#f8fafc", "#f1f5f9", "#e2e8f0", "#cbd5e1", "#94a3b8",
+      "#64748b", "#475569", "#334155", "#1e293b", "#0f172a", "#020817"];
+    const lower = content.toLowerCase();
+    const zincCount = ZINC.filter((h) => lower.includes(h)).length;
+    const slateCount = SLATE.filter((h) => lower.includes(h)).length;
+    const hexHit =
+      (zincCount >= 4 && (lower.includes("#09090b") || lower.includes("#18181b"))) ||
+      (slateCount >= 4 && (lower.includes("#020817") || lower.includes("#0f172a")));
+    if (tokenCount >= 3 || hexHit) {
+      const evidence = tokenCount >= 3
+        ? `${tokenCount} stock shadcn CSS variables still at their default values`
+        : `the stock ${zincCount >= slateCount ? "zinc" : "slate"} palette (${Math.max(zincCount, slateCount)} shades, including the default foreground/primary pair)`;
+      push(tokenLine || firstLineMatching(lines, /#[0-9a-fA-F]{6}\b/), "shadcn-fingerprint",
+        `Un-themed shadcn/Tailwind default kit — ${evidence}`,
+        "shadcn/ui is a starting point, not a theme. Change the tokens (background, foreground, primary, radius) to the brand's own values — an untouched token set is the most common AI-default tell there is.");
+    }
+  }
+
+  /* --- hero-badge-pill ------------------------------------------------ */
+  if (MARKUP_EXTENSIONS.has(ext)) {
+    const h1 = content.search(/<h1[\s>]/i);
+    if (h1 > 0) {
+      const before = content.slice(0, h1);
+      const elRe = /<(span|div|a|p|small)\b[^>]*?class\s*=\s*["']([^"']*)["'][^>]*>([^<]{1,60})<\//gi;
+      let m;
+      while ((m = elRe.exec(before)) !== null) {
+        const text = m[3].trim();
+        if (!text) continue;
+        const tokens = m[2].toLowerCase().split(/\s+/);
+        const named = tokens.some((t) => /^(badge|pill|chip)(-|$)/.test(t));
+        const round = tokens.includes("rounded-full") && text.length <= 40;
+        if (named || round) {
+          push(before.slice(0, m.index).split("\n").length, "hero-badge-pill",
+            `Badge pill floating above the hero headline ("${text}") — the "✦ Introducing…" default`,
+            "If the news is real, put it in the headline or a dated changelog entry. A pill above the H1 that says 'New' or 'AI-powered' is decoration dressed as news.");
+          break;
+        }
+      }
+    }
+  }
+
+  /* --- left-border-accent-card ---------------------------------------- */
+  {
+    // In RTL files the accent-edge story belongs to the RTL pack (the
+    // inline-start edge is the honest one there); this rule is LTR-only.
+    const isRTL = ARABIC_SCRIPT_RE.test(content) || RTL_LANG_RE.test(content) ||
+      /\bdir\s*=\s*["']rtl["']/i.test(content);
+    if (!isRTL) {
+      let count = 0;
+      let anchor = 0;
+      lines.forEach((line, i) => {
+        const css = line.match(/border-left\s*:\s*(\d+(?:\.\d+)?)px\s+solid/i);
+        const tw = /\bborder-l-(?:4|8)\b/.test(line) ||
+          /\bborder-l-\[(?:[3-9]|\d{2,})px\]/.test(line);
+        if ((css && parseFloat(css[1]) >= 3) || tw) {
+          count += 1;
+          if (!anchor) anchor = i + 1;
+        }
+      });
+      // One bordered quote is a style; two or more is a system.
+      if (count >= 2) {
+        push(anchor, "left-border-accent-card",
+          `${count} elements with a thick coloured left border — the coloured-edge card default`,
+          "A coloured left edge on every card is a system, not an accent. Use a full hairline border, a top rule or a background tint instead — and keep one device per page.");
+      }
+    }
+  }
+
+  /* --- numbered-steps-row ---------------------------------------------- */
+  {
+    // Swiss grids and workshop catalogues number things honestly, so
+    // this only fires alongside other generic landing-page findings:
+    // the row has to arrive with the rest of the template.
+    const gate = prior.some((f) =>
+      ["generic-cta", "ai-copy-words", "eyebrow-label", "generic-social-proof", "inter-only-font"]
+        .includes(f.rule));
+    if (gate && MARKUP_EXTENSIONS.has(ext)) {
+      const body = content
+        .replace(/<style[\s\S]*?<\/style>/gi, "")
+        .replace(/<script[\s\S]*?<\/script>/gi, "");
+      const numerals = [...body.matchAll(/>\s*(0[1-4])\s*</g)].map((x) => x[1]);
+      const seq = ["01", "02", "03"].every((n) => numerals.includes(n));
+      const stepWords = (body.match(/\b(?:step|phase)\s*[1-4]\b/gi) || []).length;
+      const stats = (body.match(/\b\d[\d,.]*\s*(?:%|\+|k\+|m\+|x\b)/gi) || []).length;
+      if (seq || stepWords >= 3 || stats >= 3) {
+        const what = seq || stepWords >= 3
+          ? "01 / 02 / 03 numbered-steps"
+          : `${stats}-big-number stat`;
+        const anchorLine = seq
+          ? firstLineMatching(lines, />\s*0[1-4]\s*</)
+          : stepWords >= 3
+            ? firstLineMatching(lines, /\b(?:step|phase)\s*[1-4]\b/i)
+            : firstLineMatching(lines, /\d[\d,.]*\s*(?:%|\+)/);
+        push(anchorLine, "numbered-steps-row",
+          `The ${what} row — stock section furniture of the template landing page`,
+          "Numbers earn their place when they are real: steps that actually happen, in order, or stats that are actually true. If the row exists because the template had one, cut it or fill it with specifics.");
+      }
+    }
+  }
+
+  return out;
+}
+
+/* ------------------------------------------------------------------ */
 /* Scanning                                                            */
 /* ------------------------------------------------------------------ */
 
@@ -616,6 +894,8 @@ function scanContent(content, ext, rel) {
       });
     }
   }
+
+  findings.push(...defaults2026Findings(lines, content, rel, ext, findings));
 
   findings.sort((a, b) => a.line - b.line || a.rule.localeCompare(b.rule));
   return findings;

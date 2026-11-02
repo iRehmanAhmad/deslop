@@ -6,9 +6,9 @@ Generated 2026-11-02 by `node slopbench/run.js` — do not edit by hand; re-run 
 
 - Detector under test: **deslop** (the rule engine in `bin/deslop.js`), scored with the same formula as the web checker and the audit report: `min(100, fails × 12 + warns × 4)`.
 - Dataset: **30 pages** — 15 labelled AI-built, 15 labelled human-designed (see `labels.json` for provenance per page).
-- Mean Slop Score: **AI 33.1** vs **human 2.9** (medians: AI 20, human 0).
+- Mean Slop Score: **AI 36** vs **human 2.9** (medians: AI 28, human 0).
 - Best separating threshold on this dataset: **8** (a page scoring >= 8 is predicted AI-built).
-- Accuracy at that threshold: **80%** — 12 true positives, 12 true negatives, 3 false positive(s), 3 false negative(s).
+- Accuracy at that threshold: **83.3%** — 13 true positives, 12 true negatives, 3 false positive(s), 2 false negative(s).
 
 ## Method
 
@@ -21,26 +21,26 @@ Generated 2026-11-02 by `node slopbench/run.js` — do not edit by hand; re-run 
 | Page | Label | Score | Fail | Warn | Top rules |
 |---|---|---:|---:|---:|---|
 | ai-01-sloppy-fixture.html | ai | 100 | 5 | 34 | checkmark-lists ×3, generic-cta ×3, emoji-in-ui ×2 |
-| ai-13-lovable-gradient-saas.html | ai | 100 | 2 | 46 | emoji-in-ui ×12, ai-copy-words ×11, giant-border-radius ×6 |
-| ai-14-bolt-dark-dashboard.html | ai | 76 | 2 | 13 | ai-copy-words ×3, eyebrow-label ×2, generic-cta ×2 |
-| ai-15-v0-minimal-default.html | ai | 56 | 1 | 11 | generic-cta ×5, emoji-in-ui ×4, giant-border-radius |
+| ai-13-lovable-gradient-saas.html | ai | 100 | 2 | 48 | emoji-in-ui ×12, ai-copy-words ×11, giant-border-radius ×6 |
+| ai-14-bolt-dark-dashboard.html | ai | 84 | 2 | 15 | ai-copy-words ×3, eyebrow-label ×2, generic-cta ×2 |
+| ai-15-v0-minimal-default.html | ai | 64 | 1 | 13 | generic-cta ×5, emoji-in-ui ×4, giant-border-radius |
 | ai-02-rtl-sloppy.html | ai | 40 | 1 | 7 | rtl-gradient-direction, rtl-icon-direction, rtl-latin-digits-dates |
 | ai-03-saas-tailwind.html | ai | 36 | 1 | 6 | ai-copy-words ×2, generic-cta, generic-social-proof |
 | ai-12-twins-demo-clone.html | ai | 32 | 1 | 5 | ai-copy-words, generic-cta, generic-social-proof |
-| ai-04-shadcn-dashboard.html | ai | 20 | 1 | 2 | generic-cta, giant-border-radius, inter-only-font |
-| ai-06-course-landing.html | ai | 12 | 1 | 0 | inter-only-font |
+| ai-04-shadcn-dashboard.html | ai | 28 | 1 | 4 | generic-cta, giant-border-radius, hero-badge-pill |
+| ai-06-course-landing.html | ai | 16 | 1 | 1 | inter-only-font, shadcn-fingerprint |
+| ai-07-coming-soon.html | ai | 12 | 0 | 3 | giant-border-radius ×2, shadcn-fingerprint |
 | human-04-retro-90s.html | human | 12 | 0 | 3 | em-dash-overuse, no-design-tokens, welcome-hero |
-| ai-07-coming-soon.html | ai | 8 | 0 | 2 | giant-border-radius ×2 |
+| ai-05-cream-serif-agency.html | ai | 8 | 0 | 2 | cream-serif-default, sage-green-accent |
 | ai-08-link-in-bio.html | ai | 8 | 0 | 2 | giant-border-radius ×2 |
 | ai-09-ecommerce-product.html | ai | 8 | 0 | 2 | emoji-in-ui ×2 |
 | human-11-art-deco.html | human | 8 | 0 | 2 | em-dash-overuse, emoji-in-ui |
 | human-14-punk-flyer.html | human | 8 | 0 | 2 | em-dash-overuse, emoji-in-ui |
+| ai-10-docs-site.html | ai | 4 | 0 | 1 | shadcn-fingerprint |
 | human-02-brutalist-studio.html | human | 4 | 0 | 1 | emoji-in-ui |
 | human-03-editorial-newspaper.html | human | 4 | 0 | 1 | em-dash-overuse |
 | human-05-swiss-typographic.html | human | 4 | 0 | 1 | em-dash-overuse |
 | human-08-memphis-postmodern.html | human | 4 | 0 | 1 | emoji-in-ui |
-| ai-05-cream-serif-agency.html | ai | 0 | 0 | 0 | — |
-| ai-10-docs-site.html | ai | 0 | 0 | 0 | — |
 | ai-11-portfolio-minimal.html | ai | 0 | 0 | 0 | — |
 | human-01-blog-magazine.html | human | 0 | 0 | 0 | — |
 | human-06-dark-academia.html | human | 0 | 0 | 0 | — |
@@ -61,8 +61,7 @@ Honesty is the product, so they are named, with the rules that fired:
 
 ## False negatives — AI-idiom pages deslop lets through
 
-- **ai-05-cream-serif-agency.html** — score 0 (0 fail, 0 warn). Label note: Twins corpus archetype: the 2026 replacement default — cream background, Fraunces serif display, sage green accent, tasteful agency copy. Included because 'AI look' moved here; the hardest AI page in the set.
-- **ai-10-docs-site.html** — score 0 (0 fail, 0 warn). Label note: Twins corpus archetype: default documentation site — system-ui stack, slate sidebar, blue links, code blocks. The Mintlify/Docusaurus-default idiom that AI tools reproduce constantly.
+- **ai-10-docs-site.html** — score 4 (0 fail, 1 warn). Label note: Twins corpus archetype: default documentation site — system-ui stack, slate sidebar, blue links, code blocks. The Mintlify/Docusaurus-default idiom that AI tools reproduce constantly.
 - **ai-11-portfolio-minimal.html** — score 0 (0 fail, 0 warn). Label note: Twins corpus archetype: minimal black-and-white portfolio — Helvetica, hairline type, image grid. The v0/portfolio-template default genre: restrained, but a default.
 
 ## The dataset

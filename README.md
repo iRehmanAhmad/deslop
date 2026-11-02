@@ -100,16 +100,18 @@ set and its launch grades so the claims can be checked.
 **[SlopBench](slopbench/)** is a public, provenance-labelled benchmark:
 30 single-file pages — 15 written in the idiom an AI builder ships by
 default, 15 written with deliberate, non-template design decisions —
-graded by the deslop engine. First run (2026-11-02, full detail in
+graded by the deslop engine. Latest run (2026-11-02, after the 2026
+defaults pack, full detail in
 [`slopbench/RESULTS.md`](slopbench/RESULTS.md)):
 
-- Mean Slop Score: **AI 33.1 vs human 2.9** (medians 20 vs 0).
-- **80% accuracy** at the best separating threshold (score ≥ 8) — and the
-  failures are named, as they will be in every published run: false
+- Mean Slop Score: **AI 36 vs human 2.9** (medians 28 vs 0).
+- **83.3% accuracy** at the best separating threshold (score ≥ 8) — and
+  the failures are named, as they will be in every published run: false
   positives are a hand-coded 1997 homepage (12), an Art Deco hotel page
-  (8) and a punk gig flyer (8); false negatives are the cream + serif
-  agency archetype, the default docs site and the minimal portfolio
-  (all 0 — the current default is quieter than the rules).
+  (8) and a punk gig flyer (8); false negatives are the default docs
+  site (4) and the minimal portfolio (0). The cream + serif agency
+  archetype — the previous run's flagship miss at 0 — now scores 8:
+  the 2026 pack catches it.
 - The dataset is detector-agnostic: `slopbench/labels.json` is the
   contract, and the protocol for grading another tool on it is in
   `slopbench/README.md`. Week 1, n = 30, every page authored or selected
@@ -144,9 +146,9 @@ printing notes in the kit's README.
 
 ## What it catches
 
-40 rules: 5 `fail` (Inter as the only font, purple-to-blue gradients in CSS
+48 rules: 5 `fail` (Inter as the only font, purple-to-blue gradients in CSS
 or Tailwind, lorem ipsum shipped to production, an RTL page with no
-`dir="rtl"`) and 35 `warn` (gradient
+`dir="rtl"`) and 43 `warn` (gradient
 text, glassmorphism, giant radii and shadows, emoji in the UI, checkmark
 feature lists, "Welcome to" heroes, "Get Started" buttons, "Trusted by
 10,000+ happy customers", em-dash overuse, div soup, `transition: all`,
@@ -154,6 +156,25 @@ focus outlines deleted with no replacement, and more).
 
 Every rule is documented — why it reads as AI slop and how to fix it — in
 [docs/RULES.md](docs/RULES.md).
+
+## The 2026 defaults pack — the new default look
+
+The default moved: the loud purple-gradient era gave way to a quieter
+kit, and the rules followed. The pack (8 rules, in
+[docs/RULES.md](docs/RULES.md#2026-defaults-pack--the-new-default-look))
+catches the **cream background + serif display + sage green** combo, the
+**un-themed shadcn token set** (stock CSS variables, the zinc/slate
+palette, a stock `components.json`), the **badge pill over the hero**,
+**thick coloured left-border cards**, **`hover:scale-105` on
+everything**, **01/02/03 step rows**, and the **replacement-default
+fonts** (Space Grotesk, Geist, Instrument Serif — the fonts everyone
+swapped Inter for). The combo rules are deliberately pair-based: cream
+alone is a paper choice and a serif alone is a type choice, so single
+signals never fire — that discipline is why the pack caught the
+cream + serif archetype on SlopBench without adding a single new false
+positive. Try it: `fixtures/defaults-2026.html` (all 8 rules fire) vs
+`fixtures/defaults-2026-clean.html` (warm paper and numbered steps,
+chosen on purpose — 0 findings).
 
 ## The RTL pack — the blind spot every other scanner has
 
