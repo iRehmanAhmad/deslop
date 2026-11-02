@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Clean fixture — a page with a point of view</title>
+<style>
+  :root {
+    --ink: #1c2430;
+    --paper: #fdfaf3;
+    --accent: #9a3b26;
+    --line: #d8cfbc;
+  }
+  body {
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(28, 36, 48, 0.08);
+    transition: border-color 0.2s ease;
+  }
+  .card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .primary {
+    background: var(--accent);
+    color: var(--paper);
+    border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/issues">Past issues</a>
+      <a href="/about">About the letter</a>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h1>The Sunday Repair Letter</h1>
+      <p>Every Sunday morning: one broken household thing, diagnosed in plain
+      language, with the exact part number you need and what it should cost.</p>
+      <img src="workbench.jpg" alt="A wooden workbench with a disassembled kettle and labelled screws">
+      <button class="primary">Read this week's fix: the kettle that trips the breaker</button>
+    </section>
+    <section>
+      <h2>What readers fixed last month</h2>
+      <article class="card">
+        <h3>The washing machine that walked</h3>
+        <p>Transit bolts left in after delivery. Four bolts, ten minutes, no parts to buy.</p>
+      </article>
+      <article class="card">
+        <h3>A fridge door that would not seal</h3>
+        <p>The gasket had hardened. Warm water and a hairdryer brought back most doors; a replacement gasket is part DG9-441 and costs about 18 dollars.</p>
+      </article>
+    </section>
+  </main>
+  <footer>
+    <p>Written by a person, in a shed, every week since 2021.</p>
+  </footer>
+</body>
+</html>
