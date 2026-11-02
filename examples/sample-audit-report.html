@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Design-Slop Audit — FlowPilot</title>
+<style>
+  :root {
+    --paper: #FAF5EC;
+    --card: #FFFDF8;
+    --ink: #221709;
+    --ink-soft: #5C4F43;
+    --line: #E3D7C3;
+    --brick: #B23A17;
+    --brick-tint: #F9E4DA;
+    --amber: #96660A;
+    --amber-tint: #F7ECD2;
+    --green: #1E6B4F;
+    --green-tint: #DDEEE6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Karla", "Segoe UI", "Helvetica Neue", Verdana, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+  .page { max-width: 840px; margin: 0 auto; padding: 56px 28px 40px; }
+  .cover { border-top: 10px solid var(--brick); padding-top: 30px; }
+  .kicker {
+    font-size: 13px; font-weight: 800; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--brick);
+  }
+  h1 {
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-weight: 900; font-size: 46px; line-height: 1.08;
+    letter-spacing: -0.5px; margin: 10px 0 6px;
+  }
+  .cover-site {
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-weight: 600; font-size: 26px; color: var(--ink-soft); margin: 0 0 24px;
+  }
+  .meta {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px 28px; border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line); padding: 16px 0; margin-bottom: 8px;
+  }
+  .meta .label {
+    font-size: 12px; font-weight: 800; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .meta .value { font-weight: 700; margin-top: 2px; }
+  h2 {
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-weight: 900; font-size: 30px; line-height: 1.15;
+    margin: 44px 0 6px; padding-top: 22px; border-top: 2px solid var(--ink);
+  }
+  h2 .sub { display: block; font-family: "Karla", "Segoe UI", sans-serif;
+    font-weight: 400; font-size: 16px; color: var(--ink-soft); margin-top: 6px; }
+  .score-block {
+    display: flex; align-items: center; gap: 30px; flex-wrap: wrap;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 26px 28px; margin-top: 20px;
+  }
+  .score-num {
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-weight: 900; font-size: 92px; line-height: 1;
+  }
+  .score-num small { font-size: 28px; color: var(--ink-soft); }
+  .score-clean { color: var(--green); }
+  .score-mild { color: var(--amber); }
+  .score-heavy { color: var(--brick); }
+  .verdict {
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-weight: 600; font-size: 30px; line-height: 1.15;
+  }
+  .score-counts { color: var(--ink-soft); margin-top: 6px; }
+  .scorebar {
+    height: 14px; background: var(--line); border-radius: 7px;
+    margin-top: 20px; overflow: hidden;
+  }
+  .scorebar-fill { height: 100%; border-radius: 7px; }
+  .fill-clean { background: var(--green); }
+  .fill-mild { background: var(--amber); }
+  .fill-heavy { background: var(--brick); }
+  .scorebar-note { font-size: 14px; color: var(--ink-soft); margin-top: 8px; }
+  .summary-text { font-size: 18px; margin-top: 20px; }
+  .callout {
+    border: 1px solid var(--amber); background: var(--amber-tint);
+    border-radius: 12px; padding: 20px 24px; margin-top: 28px;
+  }
+  .callout h2 { border-top: none; padding-top: 0; margin-top: 0; font-size: 26px; }
+  .finding {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 20px 24px; margin-top: 16px;
+  }
+  .finding-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .chip {
+    font-size: 12px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; padding: 4px 10px; border-radius: 999px;
+  }
+  .chip-fail { background: var(--brick-tint); color: var(--brick); }
+  .chip-warn { background: var(--amber-tint); color: var(--amber); }
+  .finding h3 {
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-size: 23px; margin: 0; line-height: 1.2;
+  }
+  .rule { font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 13px; color: var(--ink-soft); }
+  .meaning { margin: 10px 0 0; }
+  .found { font-size: 14px; color: var(--ink-soft); margin: 10px 0 0; }
+  .found code { font-family: ui-monospace, "SF Mono", Consolas, monospace; }
+  .fix {
+    margin-top: 14px; background: var(--paper);
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px;
+  }
+  .fix-label {
+    font-size: 12px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--brick);
+  }
+  .fix p { margin: 6px 0 0; }
+  .clean-box {
+    background: var(--green-tint); border: 1px solid var(--green);
+    border-radius: 12px; padding: 22px 26px; margin-top: 20px; font-size: 18px;
+  }
+  .good-list { margin: 14px 0 0; padding-left: 22px; }
+  .good-list li { margin-top: 8px; }
+  .cta {
+    margin-top: 30px; background: var(--card); border: 1px solid var(--line);
+    border-left: 6px solid var(--brick); border-radius: 10px; padding: 18px 22px;
+  }
+  .cta p { margin: 0; }
+  footer {
+    margin-top: 52px; border-top: 2px solid var(--ink); padding-top: 16px;
+    font-size: 14px; color: var(--ink-soft);
+  }
+  footer a { color: var(--brick); font-weight: 700; }
+  @media (max-width: 560px) {
+    h1 { font-size: 36px; }
+    .score-num { font-size: 68px; }
+  }
+  @media print {
+    body { background: #fff; }
+    .page { padding: 0; max-width: none; }
+    .finding, .score-block, .callout, .clean-box, .cta { break-inside: avoid; }
+    .score-num, .scorebar-fill, .chip, .verdict {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    @page { margin: 16mm; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="cover">
+    <div class="kicker">Audit report</div>
+    <h1>AI Design-Slop Audit</h1>
+    <p class="cover-site">FlowPilot</p>
+    <div class="meta">
+      <div><div class="label">Prepared for</div><div class="value">FlowPilot team (sample)</div></div>
+      <div><div class="label">Date</div><div class="value">2 November 2026</div></div>
+      <div><div class="label">Audited by</div><div class="value">Rahman Ahmad — rehmanahmad.com</div></div>
+      <div><div class="label">Scope</div><div class="value">fixtures/sloppy.html — 1 file(s) scanned</div></div>
+    </div>
+  </header>
+
+  <section>
+    <h2>Executive summary</h2>
+    <div class="score-block">
+      <div class="score-num score-heavy">100<small> / 100</small></div>
+      <div>
+        <div class="verdict">Heavy Slop</div>
+        <div class="score-counts">5 must-fix finding(s) · 34 worth-fixing finding(s)</div>
+      </div>
+    </div>
+    <div class="scorebar"><div class="scorebar-fill fill-heavy" style="width: 100%"></div></div>
+    <p class="scorebar-note">Slop Score = must-fix findings × 12 + other findings × 4, capped at 100. Higher means more AI-template tells. 0–15 Clean · 16–45 Mild · 46+ Heavy Slop.</p>
+    <p class="summary-text">This site carries many of the patterns visitors have learned to recognise as generated by an AI builder: the default fonts, gradients, layouts and phrases shared by thousands of other sites. That sameness costs trust, because visitors judge a business by how considered its site feels. The good news: every item below is a known, fixable pattern, and none of them requires a rebuild to address.</p>
+  </section>
+
+  <section>
+    <h2>Must fix <span class="sub">The obvious tells — the patterns visitors recognise first, and the ones worth addressing before anything else.</span></h2>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-fail">Must fix</span>
+      <h3>One font for everything — Inter</h3>
+      <span class="rule">inter-only-font</span>
+    </div>
+    <p class="meaning">Your whole site is set in Inter, the font AI tools pick by default. It looks clean, but it also looks like everyone else&#39;s site, so nothing about your words feels like your brand.</p>
+    <p class="found">Found in <code>sloppy.html:8</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Change the heading font to a distinctive display font with real character (for example a serif like Fraunces or Playfair Display, or a bold grotesque). Keep body text readable, and apply the new heading font to all headings and the logo.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-fail">Must fix</span>
+      <h3>The purple-to-blue gradient</h3>
+      <span class="rule">purple-blue-gradient</span>
+    </div>
+    <p class="meaning">Your site fades from purple to blue — the exact background almost every AI-built site uses. Visitors have seen it a thousand times, and it is the first thing that makes a site look auto-generated.</p>
+    <p class="found">Found in <code>sloppy.html:12</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Remove the purple-to-blue gradient background. Use a solid background colour taken from my brand instead, and keep the headline text easy to read on it. Do not use any colour gradient as a background.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-fail">Must fix</span>
+      <h3>The purple-to-blue gradient</h3>
+      <span class="rule">purple-blue-gradient</span>
+    </div>
+    <p class="meaning">Your site fades from purple to blue — the exact background almost every AI-built site uses. Visitors have seen it a thousand times, and it is the first thing that makes a site look auto-generated.</p>
+    <p class="found">Found in <code>sloppy.html:16</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Remove the purple-to-blue gradient background. Use a solid background colour taken from my brand instead, and keep the headline text easy to read on it. Do not use any colour gradient as a background.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-fail">Must fix</span>
+      <h3>The purple gradient look</h3>
+      <span class="rule">tailwind-purple-gradient</span>
+    </div>
+    <p class="meaning">Your site&#39;s background is a purple-family gradient — the default look of AI site builders. It is the single most recognised &#39;made by AI&#39; signal on the web right now.</p>
+    <p class="found">Found in <code>sloppy.html:47</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Replace the gradient background (bg-gradient-to-* using violet, indigo, purple or fuchsia) with a solid brand colour. Remove the gradient completely — do not swap it for a different gradient.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-fail">Must fix</span>
+      <h3>Fake placeholder text (Lorem ipsum)</h3>
+      <span class="rule">lorem-ipsum</span>
+    </div>
+    <p class="meaning">Part of your page still shows &#39;Lorem ipsum&#39; — the dummy text builders use while designing. Real visitors can see it, and it makes the site look unfinished.</p>
+    <p class="found">Found in <code>sloppy.html:55</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Find every piece of &#39;Lorem ipsum&#39; placeholder text and replace it with real text describing my actual product or service. If the exact words are unknown, write a short, honest description of what I offer and who it is for.</p></div>
+  </article>
+  </section>
+
+  <section>
+    <h2>Worth fixing <span class="sub">The quiet tells — individually small, but together they are what makes a site feel generated rather than designed.</span></h2>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Em-dash overload</h3>
+      <span class="rule">em-dash-overuse</span>
+    </div>
+    <p class="meaning">Your copy uses the long dash (—) again and again. One is style; a page full of them is an AI-writing fingerprint that readers increasingly notice.</p>
+    <p class="found">Found in <code>sloppy.html:5</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>In my website copy, reduce the em-dashes: rewrite most of them as full stops, commas or colons, so the dash appears only occasionally, where it really adds punch.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Lots of one-off colours</h3>
+      <span class="rule">no-design-tokens</span>
+    </div>
+    <p class="meaning">Your page uses many different hard-coded colours with no shared palette. It reads as improvised — every section picking its own colour.</p>
+    <p class="found">Found in <code>sloppy.html:9</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Define a small colour palette (brand colour, neutrals, one accent) as reusable variables, and replace the one-off colour values with palette colours.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Everything is centred</h3>
+      <span class="rule">text-center-everywhere</span>
+    </div>
+    <p class="meaning">Lots of blocks are centre-aligned. AI layouts centre everything because they cannot commit to a grid — real editorial design mostly aligns to an edge.</p>
+    <p class="found">Found in <code>sloppy.html:13</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Left-align (start-align) the body text and section content. Keep centring only for the short main headline area, if anywhere.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Rainbow headline text</h3>
+      <span class="rule">gradient-text</span>
+    </div>
+    <p class="meaning">Your headline text is filled with a colour gradient. It is a signature move of AI landing pages — decoration where one strong colour and a bolder headline would say more.</p>
+    <p class="found">Found in <code>sloppy.html:17</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Change the gradient headline text to one solid, strong colour. Make the headline bigger and bolder instead of filling it with a gradient.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Rainbow headline text</h3>
+      <span class="rule">gradient-text</span>
+    </div>
+    <p class="meaning">Your headline text is filled with a colour gradient. It is a signature move of AI landing pages — decoration where one strong colour and a bolder headline would say more.</p>
+    <p class="found">Found in <code>sloppy.html:18</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Change the gradient headline text to one solid, strong colour. Make the headline bigger and bolder instead of filling it with a gradient.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Very puffy rounded corners</h3>
+      <span class="rule">giant-border-radius</span>
+    </div>
+    <p class="meaning">Cards and boxes have very big rounded corners. When everything is soft and pillowy, the page looks like a default AI template instead of a designed site.</p>
+    <p class="found">Found in <code>sloppy.html:22</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Reduce the corner rounding on cards and boxes to a small, consistent scale (for example 8 or 12 pixels). Keep fully rounded shapes only for round things like avatars and small pill labels.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Huge, soft shadows</h3>
+      <span class="rule">giant-shadow</span>
+    </div>
+    <p class="meaning">Elements float on very large, soft shadows. A little shadow helps things stand out; clouds under everything is the AI-template look.</p>
+    <p class="found">Found in <code>sloppy.html:23</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Make the shadows much smaller and tighter, as if one light shines from above. Most cards should use a thin border instead of a big shadow.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Frosted-glass panels</h3>
+      <span class="rule">glassmorphism</span>
+    </div>
+    <p class="meaning">Some panels use the frosted-glass look — blurry and see-through. It was trendy in AI designs for a while and now reads as a template effect rather than a choice.</p>
+    <p class="found">Found in <code>sloppy.html:24</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Replace the frosted-glass (backdrop blur, translucent) panels with solid panels that have a clear border and a subtle shadow. Keep blur only for things that genuinely float above the page, like a pop-up.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>&#39;Animate everything&#39; setting</h3>
+      <span class="rule">transition-all</span>
+    </div>
+    <p class="meaning">Some elements are set to animate every property at once — the lazy default. Things move that were never meant to, and the page feels jittery.</p>
+    <p class="found">Found in <code>sloppy.html:26</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Change &#39;transition: all&#39; so only the properties that actually change are animated (colour, transform, opacity). Nothing else should move.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Keyboard focus outline deleted</h3>
+      <span class="rule">focus-outline-removed</span>
+    </div>
+    <p class="meaning">The outline that shows keyboard users where they are has been switched off, with nothing in its place. Anyone navigating your site by keyboard is now lost.</p>
+    <p class="found">Found in <code>sloppy.html:27</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Restore a visible keyboard focus style: instead of removing outlines, style :focus-visible with a clear ring in my brand colour, so keyboard users can always see where they are.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Sky-high layer numbers</h3>
+      <span class="rule">z-index-arms-race</span>
+    </div>
+    <p class="meaning">Something on the page has a stacking number (z-index) of 100 or more — a sign layers were piled up by escalation rather than planned. It is invisible until the day two pop-ups fight each other.</p>
+    <p class="found">Found in <code>sloppy.html:28</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Put the layers on a small planned scale (for example: dropdown 10, sticky header 20, modal 30, toast 40) and change any z-index of 100 or more to fit that scale.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Styles forced with overrides</h3>
+      <span class="rule">important-overuse</span>
+    </div>
+    <p class="meaning">Some styles are being forced with a special override flag (!important). It is a sign the styling was patched rather than planned, and it makes the next change unpredictable.</p>
+    <p class="found">Found in <code>sloppy.html:29</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>In my website&#39;s styles, remove the !important overrides by fixing the underlying style order or selector instead, so the design rules apply naturally.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>No real page structure</h3>
+      <span class="rule">div-soup</span>
+    </div>
+    <p class="meaning">The page is built from generic boxes with no proper landmarks (header, main, footer, sections). Search engines and screen readers cannot tell what anything is — and it usually means the page was generated without a plan.</p>
+    <p class="found">Found in <code>sloppy.html:43</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Rebuild the page structure with proper landmarks: a header, a main area, a section for each topic, and a footer, instead of nested generic div boxes.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Tiny shouty labels above headings</h3>
+      <span class="rule">eyebrow-label</span>
+    </div>
+    <p class="meaning">Sections open with a small, wide-spaced, all-caps label above the real heading. It is the AI section-header formula — when every section has one, the page feels assembled, not written.</p>
+    <p class="found">Found in <code>sloppy.html:44</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Remove the small all-caps labels above section headings, and make the headings themselves stronger and more specific instead.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Emoji used as icons</h3>
+      <span class="rule">emoji-in-ui</span>
+    </div>
+    <p class="meaning">Emoji are doing the job of icons or decoration. They render differently on every phone and computer, and visitors read them as filler rather than design.</p>
+    <p class="found">Found in <code>sloppy.html:45</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Remove emoji used as icons or decoration and use one proper icon set (for example Lucide or Heroicons) in a single consistent style. Keep emoji only inside actual chat-style messages, if there are any.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>&#39;Welcome to…&#39; headline</h3>
+      <span class="rule">welcome-hero</span>
+    </div>
+    <p class="meaning">Your main headline starts with &#39;Welcome to…&#39; — the most generic opening an AI can write. It tells visitors nothing about what they get here.</p>
+    <p class="found">Found in <code>sloppy.html:45</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Replace the &#39;Welcome to…&#39; headline with one that says what the visitor gets or can do here — the main benefit of my product, in one short sentence.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>AI-sounding marketing words</h3>
+      <span class="rule">ai-copy-words</span>
+    </div>
+    <p class="meaning">Your text uses phrases like &#39;Supercharge&#39;, &#39;seamless&#39; or &#39;cutting-edge&#39; — the filler words AI writers reach for. They promise everything and describe nothing, so visitors stop believing them.</p>
+    <p class="found">Found in <code>sloppy.html:46</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Rewrite the marketing copy to say concrete things: replace phrases like &#39;Supercharge your workflow&#39; and &#39;seamless experience&#39; with exactly what the product does, with a real detail or number, in the plain words a customer would use.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Emoji used as icons</h3>
+      <span class="rule">emoji-in-ui</span>
+    </div>
+    <p class="meaning">Emoji are doing the job of icons or decoration. They render differently on every phone and computer, and visitors read them as filler rather than design.</p>
+    <p class="found">Found in <code>sloppy.html:46</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Remove emoji used as icons or decoration and use one proper icon set (for example Lucide or Heroicons) in a single consistent style. Keep emoji only inside actual chat-style messages, if there are any.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Fully-rounded big shapes</h3>
+      <span class="rule">rounded-full-misuse</span>
+    </div>
+    <p class="meaning">A large element that is not a photo or avatar is completely round-ended. Full rounding everywhere is part of the soft AI-template look.</p>
+    <p class="found">Found in <code>sloppy.html:47</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Change fully-rounded (rounded-full) styling on large cards and images back to the normal corner radius used by the rest of the site. Keep full rounding only for avatars, dots and small pills.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Images with placeholder descriptions</h3>
+      <span class="rule">generic-alt-text</span>
+    </div>
+    <p class="meaning">Some images have descriptions like &#39;image&#39; or &#39;placeholder&#39;, which describe nothing. Screen readers read them aloud, and search engines learn nothing from them.</p>
+    <p class="found">Found in <code>sloppy.html:48</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Rewrite the alt text of every image so it describes what the image actually shows, in a few words. For purely decorative images, use an empty alt (alt=&quot;&quot;).</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>&#39;Trusted by 10,000+ customers&#39;</h3>
+      <span class="rule">generic-social-proof</span>
+    </div>
+    <p class="meaning">Your page claims a big, round number of happy customers. Round, unverifiable numbers are an AI-template staple, and visitors have learned to ignore them.</p>
+    <p class="found">Found in <code>sloppy.html:49</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Replace the round-number claim (&#39;Trusted by 10,000+ customers&#39;) with a true, specific one — a real count and who they are — or remove the claim until there is a real number to use.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Flat grey backgrounds everywhere</h3>
+      <span class="rule">flat-gray-backgrounds</span>
+    </div>
+    <p class="meaning">Section after section sits on the same flat light grey. There is no colour story, so the whole page feels like a wireframe that shipped.</p>
+    <p class="found">Found in <code>sloppy.html:52</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Build the section backgrounds from my brand palette — a warm or cool neutral family chosen on purpose, with one accent colour — instead of default light grey.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Very puffy rounded corners</h3>
+      <span class="rule">giant-border-radius</span>
+    </div>
+    <p class="meaning">Cards and boxes have very big rounded corners. When everything is soft and pillowy, the page looks like a default AI template instead of a designed site.</p>
+    <p class="found">Found in <code>sloppy.html:52</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Reduce the corner rounding on cards and boxes to a small, consistent scale (for example 8 or 12 pixels). Keep fully rounded shapes only for round things like avatars and small pill labels.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Huge, soft shadows</h3>
+      <span class="rule">giant-shadow</span>
+    </div>
+    <p class="meaning">Elements float on very large, soft shadows. A little shadow helps things stand out; clouds under everything is the AI-template look.</p>
+    <p class="found">Found in <code>sloppy.html:52</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Make the shadows much smaller and tighter, as if one light shines from above. Most cards should use a thin border instead of a big shadow.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>A shadow on everything</h3>
+      <span class="rule">shadow-on-everything</span>
+    </div>
+    <p class="meaning">Almost every box has a big shadow, so nothing stands out — when everything floats, nothing does.</p>
+    <p class="found">Found in <code>sloppy.html:52</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Pick one depth style: use borders to structure the page, and reserve shadows for the single most important floating element, like the main call-to-action card.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Blurry colour blobs</h3>
+      <span class="rule">gradient-blob</span>
+    </div>
+    <p class="meaning">There are blurred violet blobs floating in the background as decoration. They carry no information and are one of the most recognisable AI-design decorations.</p>
+    <p class="found">Found in <code>sloppy.html:53</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Remove the blurred colour blob decorations from the background. Use plain space, a subtle grid, or a real photo instead.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Checkmark bullet lists</h3>
+      <span class="rule">checkmark-lists</span>
+    </div>
+    <p class="meaning">Your feature list uses raw checkmark characters as bullets — the classic AI pricing-page look. It signals &#39;template&#39; more than it signals &#39;included&#39;.</p>
+    <p class="found">Found in <code>sloppy.html:56</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Restyle the feature lists: remove the raw checkmark characters and use a designed list marker in my brand colour, or rewrite the list as short sentences with bold lead-ins.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Checkmark bullet lists</h3>
+      <span class="rule">checkmark-lists</span>
+    </div>
+    <p class="meaning">Your feature list uses raw checkmark characters as bullets — the classic AI pricing-page look. It signals &#39;template&#39; more than it signals &#39;included&#39;.</p>
+    <p class="found">Found in <code>sloppy.html:57</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Restyle the feature lists: remove the raw checkmark characters and use a designed list marker in my brand colour, or rewrite the list as short sentences with bold lead-ins.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Checkmark bullet lists</h3>
+      <span class="rule">checkmark-lists</span>
+    </div>
+    <p class="meaning">Your feature list uses raw checkmark characters as bullets — the classic AI pricing-page look. It signals &#39;template&#39; more than it signals &#39;included&#39;.</p>
+    <p class="found">Found in <code>sloppy.html:58</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Restyle the feature lists: remove the raw checkmark characters and use a designed list marker in my brand colour, or rewrite the list as short sentences with bold lead-ins.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Bouncing and pulsing everywhere</h3>
+      <span class="rule">animation-overuse</span>
+    </div>
+    <p class="meaning">Several elements bounce or pulse. Motion should signal something — a loading state, a change. Decorative bouncing just makes the page feel nervous.</p>
+    <p class="found">Found in <code>sloppy.html:59</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Remove bounce and pulse animations except where something is genuinely loading or needs attention. One deliberate animation is better than five bouncing badges.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Default framework-blue buttons</h3>
+      <span class="rule">default-blue-buttons</span>
+    </div>
+    <p class="meaning">Your main buttons use the framework&#39;s default blue — the colour a template ships before anyone chooses a brand colour.</p>
+    <p class="found">Found in <code>sloppy.html:59</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Change the primary button colour from the default blue to my brand colour, and use it consistently for every main action.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Generic buttons (&#39;Get Started&#39;)</h3>
+      <span class="rule">generic-cta</span>
+    </div>
+    <p class="meaning">Buttons labelled &#39;Get Started&#39; or &#39;Learn More&#39; could belong to any site on Earth. Specific buttons get more clicks, because people know what happens next.</p>
+    <p class="found">Found in <code>sloppy.html:59</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Rename the generic buttons so each one names its action and payoff — for example &#39;Download the free guide&#39;, &#39;See pricing&#39; or &#39;Book a demo&#39; — matching what actually happens when it is clicked.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Generic buttons (&#39;Get Started&#39;)</h3>
+      <span class="rule">generic-cta</span>
+    </div>
+    <p class="meaning">Buttons labelled &#39;Get Started&#39; or &#39;Learn More&#39; could belong to any site on Earth. Specific buttons get more clicks, because people know what happens next.</p>
+    <p class="found">Found in <code>sloppy.html:63</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Rename the generic buttons so each one names its action and payoff — for example &#39;Download the free guide&#39;, &#39;See pricing&#39; or &#39;Book a demo&#39; — matching what actually happens when it is clicked.</p></div>
+  </article>
+  <article class="finding">
+    <div class="finding-head">
+      <span class="chip chip-warn">Worth fixing</span>
+      <h3>Generic buttons (&#39;Get Started&#39;)</h3>
+      <span class="rule">generic-cta</span>
+    </div>
+    <p class="meaning">Buttons labelled &#39;Get Started&#39; or &#39;Learn More&#39; could belong to any site on Earth. Specific buttons get more clicks, because people know what happens next.</p>
+    <p class="found">Found in <code>sloppy.html:64</code></p>
+    <div class="fix"><span class="fix-label">Recommended fix</span><p>Rename the generic buttons so each one names its action and payoff — for example &#39;Download the free guide&#39;, &#39;See pricing&#39; or &#39;Book a demo&#39; — matching what actually happens when it is clicked.</p></div>
+  </article>
+  </section>
+
+  <section>
+    <h2>What good looks like</h2>
+    <p>Whether the fixes above are applied by your own team, your AI builder, or an auditor, this is the standard they should land on:</p>
+    <ul class="good-list">
+      <li>A typeface with a point of view: headings set in a font chosen for this brand, not the builder&#39;s default, paired deliberately with the body text.</li>
+      <li>A colour story: surfaces, buttons and accents drawn from a small palette that belongs to the business, defined once and used consistently.</li>
+      <li>One depth system: borders for structure, and shadow reserved for the single element that genuinely floats.</li>
+      <li>Copy that says the concrete thing: what the product does, who it is for, with a real detail or number instead of a promise.</li>
+      <li>Structure a screen reader and a search engine can follow: real headings and landmarks, and a keyboard focus a visitor can always see.</li>
+    </ul>
+    <div class="cta">
+      <p>Prefer to have this done for you? Rahman Ahmad offers an audit-and-fix service for AI-built sites — the findings above, fixed properly, without a rebuild. Get in touch via <a href="https://rehmanahmad.com">rehmanahmad.com</a>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Generated with <a href="https://github.com/iRehmanAhmad/deslop">deslop</a>, the anti-slop scanner that can also read RTL (Urdu and Arabic included) · Audit by Rahman Ahmad, <a href="https://rehmanahmad.com">rehmanahmad.com</a></p>
+    <p>Developer advocacy: I post daily videos spotlighting free tools &amp; open-source projects for developers, teachers and students.</p>
+  </footer>
+</div>
+</body>
+</html>

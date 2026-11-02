@@ -9,6 +9,9 @@
  *
  * Usage:
  *   node bin/deslop.js [path] [--format text|json]
+ *   node bin/deslop.js report <path-or-url> [--out file] [--client N] [--site N]
+ *     (report mode lives in bin/deslop-report.js and writes a client-facing
+ *      HTML audit report; see that file for details)
  *
  * - path defaults to ./src when it exists, otherwise the current directory.
  * - Exit code is 1 when any "fail" rule hits, 0 otherwise.
@@ -671,6 +674,14 @@ function scanFile(file, rootLabel) {
 
 function main(argv) {
   const args = argv.slice(2);
+
+  // `deslop report <path-or-url> ...` hands off to the audit-report
+  // generator. A folder literally named "report" can still be scanned via
+  // an explicit path such as ./report.
+  if (args[0] === "report") {
+    return require("./deslop-report.js").run(args.slice(1));
+  }
+
   let format = "text";
   let target = null;
 
@@ -678,7 +689,10 @@ function main(argv) {
     if (args[i] === "--format") {
       format = args[++i];
     } else if (args[i] === "--help" || args[i] === "-h") {
-      console.log("Usage: node bin/deslop.js [path] [--format text|json]");
+      console.log("Usage:");
+      console.log("  node bin/deslop.js [path] [--format text|json]");
+      console.log("  node bin/deslop.js report <path-or-url> [--out report.html] [--client \"Name\"] [--site \"Name\"]");
+      console.log("    report writes a client-facing HTML audit report (see bin/deslop-report.js)");
       return 0;
     } else if (!args[i].startsWith("--")) {
       target = args[i];
@@ -739,8 +753,17 @@ function main(argv) {
   return fails > 0 ? 1 : 0;
 }
 
-module.exports = { scanContent, scanFile, LINE_RULES, FILE_RULES };
+module.exports = { scanContent, scanFile, collectFiles, LINE_RULES, FILE_RULES };
 
 if (require.main === module) {
-  process.exit(main(process.argv));
+  const result = main(process.argv);
+  // Report mode is async (it may fetch a URL); the scanner path is not.
+  if (result && typeof result.then === "function") {
+    result.then(
+      (code) => process.exit(code),
+      (err) => { console.error(`deslop: ${err.message}`); process.exit(2); }
+    );
+  } else {
+    process.exit(result);
+  }
 }

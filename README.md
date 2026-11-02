@@ -22,6 +22,34 @@ whichever AI builder made the site. Built for site owners, not developers;
 the Worker lives in [`web-checker/`](web-checker/) and runs this same rule
 engine.
 
+## Client audit reports
+
+Freelancers and agencies: turn a scan into the document you actually hand
+to a client.
+
+```bash
+node bin/deslop.js report ./src --out audit.html --client "Acme Ltd" --site "acme.com"
+node bin/deslop.js report https://acme.com --out audit.html
+```
+
+[`report`](bin/deslop-report.js) scans a local file/folder or fetches a
+live URL (the page plus its same-origin stylesheets, with the same SSRF
+guards as the web checker) and writes a **single self-contained HTML
+report**: cover header, the Slop Score (same formula as the web checker),
+an executive summary in plain language, every finding grouped must-fix
+first — what it means, where it was found, and the recommended fix — an
+RTL note when Urdu/Arabic issues are present, and a "what good looks like"
+closing section with a soft service call-to-action. It prints cleanly to
+PDF. The wording is the web checker's plain-language copy, not a second
+hand-maintained copy: `web-checker/worker.js` is the source of truth and
+`bin/report-copy.js` is generated from it by
+[`web-checker/sync-copy.js`](web-checker/sync-copy.js), so a rule reads
+identically in the browser checker and in a client report.
+
+Sample, generated from `fixtures/sloppy.html` (score 100, Heavy Slop):
+[`examples/sample-audit-report.html`](examples/sample-audit-report.html) —
+download it and open it in a browser.
+
 ## What it catches
 
 40 rules: 5 `fail` (Inter as the only font, purple-to-blue gradients in CSS
