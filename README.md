@@ -223,6 +223,48 @@ sloppy.html:55  [FAIL] lorem-ipsum — Lorem ipsum placeholder text left in the 
 deslop: scanned 1 file(s) — 5 fail, 34 warning(s)
 ```
 
+## Install
+
+Three ways in, depending on what you want:
+
+**As an agent skill (recommended)** — one command registers the skill
+from this repo:
+
+```bash
+npx skills add iRehmanAhmad/deslop
+```
+
+Or let deslop place the files itself — project `.claude/skills/deslop/`
+plus your user `~/.claude/skills/deslop/` (SKILL.md + the RULES.md
+reference), idempotently, saying exactly what it wrote where:
+
+```bash
+deslop install                 # Claude Code targets (default)
+deslop install --cursor        # …plus a project Cursor rule (.cursor/rules/deslop.mdc)
+deslop install --dry-run       # print the plan, write nothing
+```
+
+**As a CLI** — on npm as a scoped package:
+
+```bash
+npm install -g @irehmanahmad/deslop
+deslop ./src
+```
+
+**As a GitHub Action** — this repo is its own action; it fails the
+workflow when any `fail` rule hits:
+
+```yaml
+- uses: iRehmanAhmad/deslop@v1
+  with:
+    path: ./src
+```
+
+There is also a **Claude Code PostToolUse hook** in
+[`hooks/`](hooks/README.md): two minutes of setup and every UI file
+Claude edits gets scanned on the spot, findings printed into the tool
+result — it never blocks, it just makes the slop visible immediately.
+
 ## Install & usage
 
 No dependencies, nothing to install — just Node.js 18 or newer.
@@ -258,7 +300,51 @@ the agent
 
 Copy `SKILL.md` (and keep `bin/deslop.js` reachable, or point it at this
 repo) into your agent's skills folder, and your agent starts grading its
-own homework.
+own homework — or skip the copying: `deslop install` does it for you
+(see [Install](#install)).
+
+## Config & waivers
+
+Deliberate design should not fight the scanner. Two escape hatches, both
+of which leave a paper trail:
+
+**Project config** — a `deslop.config.json` in the scanned root (or the
+current directory):
+
+```json
+{
+  "ignore": ["purple-blue-gradient"],
+  "ignoreFiles": ["src/legacy/**", "*.draft.html"],
+  "failOn": "any"
+}
+```
+
+- `ignore` — rule ids to suppress everywhere in the project.
+- `ignoreFiles` — globs for files to skip entirely (`**`, `*`, `?`;
+  patterns without a slash match basenames).
+- `failOn` — `"fail"` (default: exit 1 only on `fail` findings) or
+  `"any"` (exit 1 on warnings too, for strict CI).
+
+Unknown keys warn on stderr; invalid JSON is a clear error (exit 2),
+never a silent pass.
+
+**Inline waivers** — for one deliberate pattern in one file, waive the
+finding where it lives, in any comment syntax:
+
+```css
+.hero { background: linear-gradient(90deg, #7c3aed, #2563eb); } /* deslop-ignore: purple-blue-gradient — brand gradient, chosen deliberately */
+```
+
+```html
+<!-- deslop-ignore: lorem-ipsum — placeholder copy kept for the client review draft -->
+```
+
+The waiver covers its own line and the line above it, can list several
+rules comma-separated, and **the reason is required**: a
+`deslop-ignore` without one suppresses nothing and is itself reported as
+a `deslop-waiver-no-reason` warning. Waived findings are counted in the
+scan footer (`deslop: 3 finding(s) waived by inline waivers`), so a
+waiver is a visible decision, not a hiding place.
 
 ## A note on intent
 

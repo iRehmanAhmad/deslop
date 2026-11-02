@@ -15,6 +15,17 @@
  *   node bin/deslop.js twins <url-or-path> [--corpus dir] [--json]
  *     (twins mode lives in bin/deslop-twins.js and fingerprints a page's
  *      layout + style signature, ranking its "layout twins"; see that file)
+ *   node bin/deslop.js install [--claude] [--cursor] [--dry-run]
+ *     (install mode lives in bin/deslop-install.js and copies SKILL.md into
+ *      .claude/skills, ~/.claude/skills and optionally .cursor/rules)
+ *
+ * A deslop.config.json in the scanned root (or the cwd) can ignore rules,
+ * skip files, and change the exit-code policy — see "Config & waivers" in
+ * README.md. Individual findings can be waived inline with a reason:
+ *   deslop-ignore: <rule-id> — <why this one is deliberate>
+ * (HTML/CSS/JS comment syntax all work; the waiver covers its own line and
+ * the line above it. A waiver without a reason suppresses nothing and is
+ * itself reported as a `deslop-waiver-no-reason` warning.)
  *
  * - path defaults to ./src when it exists, otherwise the current directory.
  * - Exit code is 1 when any "fail" rule hits, 0 otherwise.
@@ -952,6 +963,146 @@ function scanFile(file, rootLabel) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Config file (deslop.config.json) + inline waivers                   */
+/* ------------------------------------------------------------------ */
+
+const CONFIG_NAME = "deslop.config.json";
+const KNOWN_CONFIG_KEYS = new Set(["ignore", "ignoreFiles", "failOn"]);
+
+/**
+ * Find deslop.config.json: the scanned root first (the target directory,
+ * or the target file's directory), then the current directory.
+ * Returns { config, error } — config is null when no file exists;
+ * error is a message string when a found file is unusable (exit 2).
+ */
+function loadConfig(resolved, isDir) {
+  const rootDir = isDir ? resolved : path.dirname(resolved);
+  const candidates = [path.join(rootDir, CONFIG_NAME)];
+  const cwdCfg = path.join(process.cwd(), CONFIG_NAME);
+  if (cwdCfg !== candidates[0]) candidates.push(cwdCfg);
+  const cfgPath = candidates.find((c) => fs.existsSync(c));
+  if (!cfgPath) return { config: null, error: null };
+
+  let parsed;
+  try {
+    parsed = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+  } catch (err) {
+    return { config: null, error: `deslop: invalid JSON in ${cfgPath}: ${err.message}` };
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { config: null, error: `deslop: ${cfgPath} must contain a JSON object` };
+  }
+
+  for (const key of Object.keys(parsed)) {
+    if (!KNOWN_CONFIG_KEYS.has(key)) {
+      console.error(`deslop: warning: unknown config key "${key}" in ${cfgPath} (ignored)`);
+    }
+  }
+  const config = { ignore: [], ignoreFiles: [], failOn: "fail", path: cfgPath };
+  for (const key of ["ignore", "ignoreFiles"]) {
+    if (parsed[key] === undefined) continue;
+    if (Array.isArray(parsed[key]) && parsed[key].every((x) => typeof x === "string")) {
+      config[key] = parsed[key];
+    } else {
+      console.error(`deslop: warning: "${key}" in ${cfgPath} must be an array of strings (ignored)`);
+    }
+  }
+  if (parsed.failOn !== undefined) {
+    if (parsed.failOn === "fail" || parsed.failOn === "any") {
+      config.failOn = parsed.failOn;
+    } else {
+      console.error(`deslop: warning: "failOn" in ${cfgPath} must be "fail" or "any" (using "fail")`);
+    }
+  }
+  return { config, error: null };
+}
+
+/** Convert a glob to a RegExp. Supports **, * and ?. */
+function globToRegExp(glob) {
+  const g = glob.replace(/\\/g, "/");
+  let re = "";
+  for (let i = 0; i < g.length; i++) {
+    const c = g[i];
+    if (c === "*") {
+      if (g[i + 1] === "*") {
+        if (g[i + 2] === "/") { re += "(?:.*/)?"; i += 2; }
+        else { re += ".*"; i += 1; }
+      } else {
+        re += "[^/]*";
+      }
+    } else if (c === "?") {
+      re += "[^/]";
+    } else {
+      re += c.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+    }
+  }
+  return new RegExp(`^${re}$`);
+}
+
+/**
+ * Does `file` match any ignoreFiles glob? Patterns without a slash match
+ * the basename anywhere; patterns with a slash match the path relative to
+ * the scanned root (or to the cwd), forward-slash normalised.
+ */
+function fileIgnoredByGlobs(file, globs, rootDir) {
+  const candidates = new Set([path.basename(file)]);
+  for (const base of [rootDir, process.cwd()]) {
+    const rel = path.relative(base, file).replace(/\\/g, "/");
+    if (rel && !rel.startsWith("..")) candidates.add(rel);
+  }
+  return globs.some((glob) => {
+    const re = globToRegExp(glob);
+    if (!glob.includes("/")) return re.test(path.basename(file));
+    return [...candidates].some((c) => re.test(c));
+  });
+}
+
+/**
+ * Parse inline waivers from a file's lines.
+ *
+ *   deslop-ignore: <rule-id>[, <rule-id>] — <reason>
+ *
+ * works inside any comment syntax (<!-- -->, /* *\/, //) because the token
+ * is matched in the raw line text. A waiver covers findings on its OWN
+ * line and the line ABOVE it (so it can sit trailing on the line after a
+ * declaration block as well as trailing on the offending line itself).
+ * The reason is REQUIRED: the rule list must be followed by a spaced
+ * em dash (—), en dash (–) or hyphen (-) and non-empty text. A waiver
+ * without a reason suppresses nothing and is returned as a problem.
+ *
+ * Returns { covered: Map<lineNo, Set<ruleId>>, problems: [{line, rules}] }.
+ */
+function parseWaivers(content) {
+  const lines = content.split(/\r?\n/);
+  const covered = new Map();
+  const problems = [];
+  lines.forEach((line, idx) => {
+    const m = line.match(/deslop-ignore:\s*(.+)$/);
+    if (!m) return;
+    let rest = m[1].trim().replace(/(\*\/|-->)\s*$/, "").trim();
+    const sep = rest.match(/^(.*?)\s+(?:—|–|-)\s+(\S.*)$/);
+    let rulesPart = rest;
+    let reason = "";
+    if (sep) {
+      rulesPart = sep[1];
+      reason = sep[2].trim();
+    }
+    const rules = rulesPart.split(",").map((s) => s.trim()).filter(Boolean);
+    const lineNo = idx + 1;
+    if (!reason || rules.length === 0) {
+      problems.push({ line: lineNo, rules });
+      return;
+    }
+    for (const ln of [lineNo, lineNo - 1]) {
+      if (ln < 1) continue;
+      if (!covered.has(ln)) covered.set(ln, new Set());
+      for (const r of rules) covered.get(ln).add(r);
+    }
+  });
+  return { covered, problems };
+}
+
+/* ------------------------------------------------------------------ */
 /* Main                                                                */
 /* ------------------------------------------------------------------ */
 
@@ -972,6 +1123,13 @@ function main(argv) {
     return require("./deslop-twins.js").run(args.slice(1));
   }
 
+  // `deslop install ...` copies the agent skill into .claude/skills,
+  // ~/.claude/skills and (with --cursor) .cursor/rules. A folder literally
+  // named "install" can still be scanned via ./install.
+  if (args[0] === "install") {
+    return require("./deslop-install.js").run(args.slice(1));
+  }
+
   let format = "text";
   let target = null;
 
@@ -985,6 +1143,12 @@ function main(argv) {
       console.log("    report writes a client-facing HTML audit report (see bin/deslop-report.js)");
       console.log("  node bin/deslop.js twins <url-or-path> [--corpus <dir>] [--json]");
       console.log("    twins fingerprints a page's layout + style and ranks its layout twins (see bin/deslop-twins.js)");
+      console.log("  node bin/deslop.js install [--claude] [--cursor] [--dry-run]");
+      console.log("    install copies the deslop agent skill into .claude/skills, ~/.claude/skills (and .cursor/rules with --cursor)");
+      console.log("");
+      console.log("Config: a deslop.config.json in the scanned root or cwd supports");
+      console.log('  { "ignore": ["rule-id"], "ignoreFiles": ["glob"], "failOn": "fail" | "any" }');
+      console.log("Inline waiver: deslop-ignore: <rule-id> — <reason> (own line + line above).");
       return 0;
     } else if (!args[i].startsWith("--")) {
       target = args[i];
@@ -1006,16 +1170,58 @@ function main(argv) {
     return 2;
   }
 
-  const files = collectFiles(resolved);
+  const isDirTarget = fs.statSync(resolved).isDirectory();
+
+  // deslop.config.json (scanned root, else cwd) — a malformed config is a
+  // hard error: silently ignoring it would hide the user's intent.
+  const { config, error: configError } = loadConfig(resolved, isDirTarget);
+  if (configError) {
+    console.error(configError);
+    return 2;
+  }
+
+  let files = collectFiles(resolved);
+  let filesSkipped = 0;
+  if (config && config.ignoreFiles.length > 0) {
+    const rootDir = isDirTarget ? resolved : path.dirname(resolved);
+    const kept = files.filter((f) => !fileIgnoredByGlobs(f, config.ignoreFiles, rootDir));
+    filesSkipped = files.length - kept.length;
+    files = kept;
+  }
+
   const allFindings = [];
+  let waivedCount = 0;
   for (const file of files) {
-    const label = fs.statSync(resolved).isFile()
+    const label = !isDirTarget
       ? path.basename(file)
       : path.relative(process.cwd(), file) || file;
+    let content;
     try {
-      allFindings.push(...scanFile(file, label));
+      content = fs.readFileSync(file, "utf8");
     } catch (err) {
       console.error(`deslop: could not read ${file}: ${err.message}`);
+      continue;
+    }
+    const findings = scanContent(content, path.extname(file), label);
+    const { covered, problems } = parseWaivers(content);
+    for (const p of problems) {
+      findings.push({
+        file: label,
+        line: p.line,
+        rule: "deslop-waiver-no-reason",
+        severity: "warn",
+        message: `deslop-ignore waiver${p.rules.length ? ` for ${p.rules.join(", ")}` : ""} has no reason — a waiver without a reason suppresses nothing`,
+        hint: "Waivers must say why: deslop-ignore: <rule-id> — <reason>. If the pattern is deliberate design, one line saying so is enough.",
+      });
+    }
+    findings.sort((a, b) => a.line - b.line || a.rule.localeCompare(b.rule));
+    for (const f of findings) {
+      const waivedBy = covered.get(f.line);
+      if (waivedBy && waivedBy.has(f.rule)) {
+        waivedCount++;
+      } else {
+        allFindings.push(f);
+      }
     }
   }
 
@@ -1045,33 +1251,62 @@ function main(argv) {
     }
   }
 
-  const fails = allFindings.filter((f) => f.severity === "fail").length;
-  const warns = allFindings.length - fails;
+  // Config "ignore" drops whole rules, across every file, after waivers.
+  let configIgnoredCount = 0;
+  let finalFindings = allFindings;
+  if (config && config.ignore.length > 0) {
+    const ignoreSet = new Set(config.ignore);
+    finalFindings = allFindings.filter((f) => !ignoreSet.has(f.rule));
+    configIgnoredCount = allFindings.length - finalFindings.length;
+  }
+
+  const fails = finalFindings.filter((f) => f.severity === "fail").length;
+  const warns = finalFindings.length - fails;
 
   if (format === "json") {
+    const summary = { fail: fails, warn: warns, total: finalFindings.length };
+    if (waivedCount > 0) summary.waived = waivedCount;
+    if (configIgnoredCount > 0) summary.ignoredByConfig = configIgnoredCount;
     console.log(JSON.stringify({
       tool: "deslop",
       filesScanned: files.length,
-      findings: allFindings,
-      summary: { fail: fails, warn: warns, total: allFindings.length },
+      findings: finalFindings,
+      summary,
     }, null, 2));
   } else {
-    for (const f of allFindings) {
+    for (const f of finalFindings) {
       const tag = f.severity === "fail" ? "FAIL" : "warn";
       console.log(`${f.file}:${f.line}  [${tag}] ${f.rule} — ${f.message}`);
       console.log(`    fix: ${f.hint}`);
     }
     console.log("");
     console.log(`deslop: scanned ${files.length} file(s) — ${fails} fail, ${warns} warning(s)`);
-    if (allFindings.length === 0) {
+    if (waivedCount > 0) {
+      console.log(`deslop: ${waivedCount} finding(s) waived by inline waivers`);
+    }
+    if (configIgnoredCount > 0) {
+      console.log(`deslop: ${configIgnoredCount} finding(s) ignored by deslop.config.json`);
+    }
+    if (filesSkipped > 0) {
+      console.log(`deslop: ${filesSkipped} file(s) skipped by ignoreFiles in deslop.config.json`);
+    }
+    if (finalFindings.length === 0) {
       console.log("deslop: no AI design slop found. Nice work.");
     }
   }
 
+  // Exit policy: failOn "fail" (default) fails on FAIL findings only;
+  // failOn "any" fails on any remaining finding, warnings included.
+  if (config && config.failOn === "any") {
+    return finalFindings.length > 0 ? 1 : 0;
+  }
   return fails > 0 ? 1 : 0;
 }
 
-module.exports = { scanContent, scanFile, collectFiles, LINE_RULES, FILE_RULES };
+module.exports = {
+  scanContent, scanFile, collectFiles, LINE_RULES, FILE_RULES,
+  loadConfig, parseWaivers, globToRegExp, fileIgnoredByGlobs,
+};
 
 if (require.main === module) {
   const result = main(process.argv);

@@ -1,0 +1,26 @@
+name: "deslop — AI design slop check"
+description: "Scan UI source (CSS, HTML, JSX/TSX, Vue, Astro, Svelte) for AI design slop — Inter-everything, purple gradients, generic cards — and fail the build on FAIL findings."
+author: "Rahman Ahmad"
+branding:
+  icon: "eye"
+  color: "orange"
+
+inputs:
+  path:
+    description: "File or folder to scan, relative to the workspace root."
+    required: false
+    default: "."
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Run deslop
+      shell: bash
+      # deslop exits 1 when any FAIL rule hits, which fails this step —
+      # and therefore the workflow — exactly as a lint gate should.
+      run: node "${{ github.action_path }}/bin/deslop.js" "${{ github.workspace }}/${{ inputs.path }}"

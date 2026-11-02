@@ -1,0 +1,1 @@
+{"hooks":{"PostToolUse":[{"hooks":[{"command":"/absolute/path/to/deslop/hooks/deslop-hook.sh","type":"command"}],"matcher":"Edit|Write"}]}}
