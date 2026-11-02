@@ -20,6 +20,11 @@
 const fs = require("fs");
 const path = require("path");
 
+// === ENGINE BEGIN ===
+// Pure scanning engine: no fs/path, no I/O. Everything between the ENGINE
+// markers is shared verbatim with the web checker — web-checker/engine.js is
+// GENERATED from this section by web-checker/sync-engine.js. Edit rules here,
+// never in engine.js.
 const EXTENSIONS = new Set([
   ".css", ".scss", ".html", ".jsx", ".tsx", ".vue", ".astro", ".svelte",
 ]);
@@ -568,35 +573,20 @@ const FILE_RULES = [
 /* Scanning                                                            */
 /* ------------------------------------------------------------------ */
 
-function collectFiles(target) {
-  const stat = fs.statSync(target);
-  if (stat.isFile()) {
-    return EXTENSIONS.has(path.extname(target)) ? [target] : [];
-  }
-  const out = [];
-  const walk = (dir) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      if (entry.isDirectory()) {
-        if (!SKIP_DIRS.has(entry.name)) walk(path.join(dir, entry.name));
-      } else if (EXTENSIONS.has(path.extname(entry.name))) {
-        out.push(path.join(dir, entry.name));
-      }
-    }
-  };
-  walk(target);
-  return out.sort();
-}
-
 function firstLineMatching(lines, re) {
   const idx = lines.findIndex((l) => re.test(l));
   return idx === -1 ? 1 : idx + 1;
 }
 
-function scanFile(file, rootLabel) {
-  const content = fs.readFileSync(file, "utf8");
+/**
+ * Scan one file's content. Pure: no I/O.
+ * @param {string} content  file text
+ * @param {string} ext      extension including the dot, e.g. ".html"
+ * @param {string} rel      label reported as `file` in each finding
+ * @returns {Array} findings: {file, line, rule, severity, message, hint}
+ */
+function scanContent(content, ext, rel) {
   const lines = content.split(/\r?\n/);
-  const rel = rootLabel;
-  const ext = path.extname(file);
   const findings = [];
 
   lines.forEach((line, i) => {
@@ -643,6 +633,36 @@ function scanFile(file, rootLabel) {
 
   findings.sort((a, b) => a.line - b.line || a.rule.localeCompare(b.rule));
   return findings;
+}
+
+// === ENGINE END ===
+
+/* ------------------------------------------------------------------ */
+/* Filesystem + CLI (not part of the shared engine)                    */
+/* ------------------------------------------------------------------ */
+
+function collectFiles(target) {
+  const stat = fs.statSync(target);
+  if (stat.isFile()) {
+    return EXTENSIONS.has(path.extname(target)) ? [target] : [];
+  }
+  const out = [];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        if (!SKIP_DIRS.has(entry.name)) walk(path.join(dir, entry.name));
+      } else if (EXTENSIONS.has(path.extname(entry.name))) {
+        out.push(path.join(dir, entry.name));
+      }
+    }
+  };
+  walk(target);
+  return out.sort();
+}
+
+function scanFile(file, rootLabel) {
+  const content = fs.readFileSync(file, "utf8");
+  return scanContent(content, path.extname(file), rootLabel);
 }
 
 /* ------------------------------------------------------------------ */
@@ -718,6 +738,8 @@ function main(argv) {
 
   return fails > 0 ? 1 : 0;
 }
+
+module.exports = { scanContent, scanFile, LINE_RULES, FILE_RULES };
 
 if (require.main === module) {
   process.exit(main(process.argv));

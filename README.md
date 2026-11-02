@@ -12,6 +12,16 @@ not thinking about your product*.
 those patterns in your source files and reports them — with the file, the
 line, and how to fix it — *before* the agent calls the UI done.
 
+## No code? Check any live site in the browser
+
+**[deslop-checker.rehmanahmad.com](https://deslop-checker.rehmanahmad.com)** —
+paste a published site's URL and get a **Slop Score** (0 = clean, 100 =
+every AI cliché), each tell explained in plain language, and a **copy-paste
+fix prompt** for every finding that you hand back to Lovable, Bolt, v0 or
+whichever AI builder made the site. Built for site owners, not developers;
+the Worker lives in [`web-checker/`](web-checker/) and runs this same rule
+engine.
+
 ## What it catches
 
 40 rules: 5 `fail` (Inter as the only font, purple-to-blue gradients in CSS

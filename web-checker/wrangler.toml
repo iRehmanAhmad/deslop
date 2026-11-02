@@ -1,0 +1,11 @@
+# deslop-checker — optional wrangler config.
+# Production deploys so far use the Cloudflare API directly (see
+# deploy_cf.py in this folder, modeled on the ReIndexer worker deploy).
+# This file is for anyone who prefers:  npx wrangler deploy
+name = "deslop-checker"
+main = "worker.js"
+compatibility_date = "2025-06-01"
+
+[[routes]]
+pattern = "deslop-checker.rehmanahmad.com"
+custom_domain = true
