@@ -9,6 +9,15 @@
   "engines": {
     "node": ">=18"
   },
+  "files": [
+    "bin/",
+    "SKILL.md",
+    "docs/",
+    "hooks/",
+    "twins-corpus/",
+    "action.yml",
+    ".claude-plugin/"
+  ],
   "homepage": "https://rehmanahmad.com",
   "keywords": [
     "ai",
