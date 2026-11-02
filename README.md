@@ -92,6 +92,38 @@ runtime by a JS framework will fingerprint thinner than it renders. Read
 the score as "how much of the same template DNA", not "how identical it
 looks".
 
+## SlopBench + Slop Index
+
+Claims about detecting "the AI look" are cheap; deslop publishes its test
+set and its launch grades so the claims can be checked.
+
+**[SlopBench](slopbench/)** is a public, provenance-labelled benchmark:
+30 single-file pages — 15 written in the idiom an AI builder ships by
+default, 15 written with deliberate, non-template design decisions —
+graded by the deslop engine. First run (2026-11-02, full detail in
+[`slopbench/RESULTS.md`](slopbench/RESULTS.md)):
+
+- Mean Slop Score: **AI 33.1 vs human 2.9** (medians 20 vs 0).
+- **80% accuracy** at the best separating threshold (score ≥ 8) — and the
+  failures are named, as they will be in every published run: false
+  positives are a hand-coded 1997 homepage (12), an Art Deco hotel page
+  (8) and a punk gig flyer (8); false negatives are the cream + serif
+  agency archetype, the default docs site and the minimal portfolio
+  (all 0 — the current default is quieter than the rules).
+- The dataset is detector-agnostic: `slopbench/labels.json` is the
+  contract, and the protocol for grading another tool on it is in
+  `slopbench/README.md`. Week 1, n = 30, every page authored or selected
+  in-repo — the caveats are printed in RESULTS.md, not footnoted away.
+
+**[The Slop Index](slop-index/)** runs the same machinery over the real
+world: the newest ~20 Show HN launches each run, fetched live, scored,
+fingerprinted, and snapshotted into `slop-index/data/`. First snapshot
+(2026-11-02): **20 launches found, 19 scored, average Slop Score 31.6**;
+sloppiest a word-game launch at 100, cleanest a Linux syscall reference
+at 0; one launch refused the fetch (HTTP 403) and is recorded as a
+failure, not skipped. Weekly runs turn the snapshots into a trend — and
+their fingerprints into a corpus of real-world layout twins.
+
 ## What it catches
 
 40 rules: 5 `fail` (Inter as the only font, purple-to-blue gradients in CSS

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sloppy fixture — everything deslop should catch</title>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f9fafb;
+  }
+  .hero {
+    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+    text-align: center;
+  }
+  .hero h1 {
+    background: linear-gradient(90deg, #a855f7, #2563eb);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .card {
+    border-radius: 32px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+    outline: none;
+    z-index: 999;
+    color: #111827 !important;
+    border-color: #6366f1 !important;
+    margin: 0 !important;
+  }
+  .palette-a { color: #7c3aed; }
+  .palette-b { color: #059669; }
+  .palette-c { color: #dc2626; }
+  .palette-d { color: #d97706; }
+  .palette-e { color: #0891b2; }
+  .palette-f { color: #be185d; }
+  .palette-g { color: #65a30d; }
+</style>
+</head>
+<body>
+  <div class="hero">
+    <div class="uppercase tracking-widest">Introducing FlowPilot</div>
+    <h1>Welcome to FlowPilot 🚀</h1>
+    <p>Supercharge your workflow — seamlessly elevate your team's productivity — unlock the power of cutting-edge, next-level automation — effortlessly. ✨</p>
+    <div class="w-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500">Get started today</div>
+    <img src="hero.png" alt="image">
+    <div>Trusted by 10,000+ happy customers</div>
+  </div>
+
+  <div class="bg-gray-50 text-center shadow-2xl rounded-3xl">
+    <div class="bg-violet-500 blur-3xl"></div>
+    <h2>Features you will love</h2>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    <div>✓ Unlimited projects</div>
+    <div>✓ Real-time collaboration</div>
+    <div>✓ Advanced analytics</div>
+    <button class="bg-blue-600 shadow-xl animate-bounce">Get Started</button>
+  </div>
+
+  <div class="bg-gray-100 text-center shadow-lg">
+    <button class="bg-blue-500 animate-pulse">Learn More</button>
+    <button class="bg-blue-700 animate-pulse">Click here</button>
+    <div class="shadow-lg">Card one</div>
+    <div class="shadow-xl">Card two</div>
+    <div class="shadow-lg">Card three</div>
+  </div>
+
+  <div class="bg-slate-100 text-center">
+    <div>One</div><div>Two</div><div>Three</div><div>Four</div>
+    <div>Five</div><div>Six</div><div>Seven</div><div>Eight</div>
+    <div>Nine</div><div>Ten</div><div>Eleven</div><div>Twelve</div>
+  </div>
+  <div class="text-center">Footer note</div>
+</body>
+</html>

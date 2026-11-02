@@ -1,0 +1,1462 @@
+{
+  "tool": "deslop-slop-index",
+  "version": 1,
+  "date": "2026-11-02",
+  "generatedAt": "2026-11-02T16:10:15.184Z",
+  "source": "Hacker News API — /v0/showstories.json (https://hacker-news.firebaseio.com)",
+  "method": "Each launch site (page + up to 5 same-origin stylesheets) is scanned with the deslop engine; Slop Score = min(100, fails*12 + warns*4); verdicts 0–15 Clean, 16–45 Mild, 46+ Heavy Slop; top twin = highest Visual Twins similarity against the built-in 10-archetype corpus.",
+  "requested": 20,
+  "launchesFound": 20,
+  "scored": 19,
+  "failed": 1,
+  "averageScore": 31.6,
+  "results": [
+    {
+      "name": "Blorgle – a word game with a community-driven word bank",
+      "url": "https://blorgle.com/daily",
+      "finalUrl": "https://blorgle.com/daily",
+      "hnId": 50337499,
+      "hnTime": "2026-11-02T14:43:49.000Z",
+      "score": 100,
+      "verdict": "Heavy Slop",
+      "fails": 0,
+      "warns": 31,
+      "stylesheetsScanned": 1,
+      "topTwin": {
+        "name": "Minimal portfolio",
+        "score": 35
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:13ff906d",
+          "string": "header@3 main@3 section@4 aside@4 section@5×3",
+          "sequence": [
+            "header",
+            "main",
+            "section",
+            "aside",
+            "section",
+            "section",
+            "section"
+          ],
+          "counts": {
+            "header": 1,
+            "nav": 0,
+            "main": 1,
+            "section": 4,
+            "article": 0,
+            "aside": 1,
+            "footer": 0
+          },
+          "divs": 51,
+          "maxDepth": 8,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 32,
+            "4": 16,
+            "5": 39,
+            "6": 52,
+            "7": 44,
+            "8": 9
+          }
+        },
+        "sections": [
+          "cta",
+          "features-grid"
+        ],
+        "palette": [
+          "#000000",
+          "#ffffff",
+          "#34d27a",
+          "#968adf",
+          "#0f1115",
+          "#3a5cf5"
+        ],
+        "fonts": [
+          "Roboto",
+          "Segoe UI"
+        ],
+        "radius": [
+          "8px",
+          "999px",
+          "12px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "GhostBase – 25MB terminal database studio for SQLite, Postgres, MySQL",
+      "url": "https://github.com/4yk5/GhostBase",
+      "finalUrl": "https://github.com/4yk5/GhostBase",
+      "hnId": 50332986,
+      "hnTime": "2026-11-02T04:01:33.000Z",
+      "score": 100,
+      "verdict": "Heavy Slop",
+      "fails": 0,
+      "warns": 36,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Documentation site",
+        "score": 48
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:9b757d1d",
+          "string": "header@8 nav@12 main@6 header@9 nav@12 nav@10 header@20 nav@28 article@28 footer@4 nav@6",
+          "sequence": [
+            "header",
+            "nav",
+            "main",
+            "header",
+            "nav",
+            "nav",
+            "header",
+            "nav",
+            "article",
+            "footer",
+            "nav"
+          ],
+          "counts": {
+            "header": 3,
+            "nav": 5,
+            "main": 1,
+            "section": 0,
+            "article": 1,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 398,
+          "maxDepth": 35,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 193,
+            "4": 12,
+            "5": 35,
+            "6": 20,
+            "7": 46,
+            "8": 23,
+            "9": 19,
+            "10": 10,
+            "11": 13,
+            "12": 1616
+          }
+        },
+        "sections": [
+          "hero",
+          "footer"
+        ],
+        "palette": [
+          "#000000",
+          "#1e2327"
+        ],
+        "fonts": [],
+        "radius": [
+          "4px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "AgentTrafficCop – Stop AI agents from looping and burning money",
+      "url": "https://agenttrafficcop.com",
+      "finalUrl": "https://agenttrafficcop.com/",
+      "hnId": 50337488,
+      "hnTime": "2026-11-02T14:43:09.000Z",
+      "score": 92,
+      "verdict": "Heavy Slop",
+      "fails": 0,
+      "warns": 23,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "shadcn-style dashboard landing",
+        "score": 48
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:8afc5116",
+          "string": "header@3 nav@5 section@3×6 footer@3",
+          "sequence": [
+            "header",
+            "nav",
+            "section",
+            "section",
+            "section",
+            "section",
+            "section",
+            "section",
+            "footer"
+          ],
+          "counts": {
+            "header": 1,
+            "nav": 1,
+            "main": 0,
+            "section": 6,
+            "article": 0,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 67,
+          "maxDepth": 8,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 29,
+            "4": 9,
+            "5": 30,
+            "6": 52,
+            "7": 78,
+            "8": 37
+          }
+        },
+        "sections": [
+          "pricing",
+          "features-grid",
+          "pricing",
+          "cta",
+          "footer"
+        ],
+        "palette": [
+          "#000000",
+          "#f87171",
+          "#ffffff",
+          "#10b981",
+          "#a1a1a1",
+          "#0a0a0a"
+        ],
+        "fonts": [
+          "Geist",
+          "Geist Mono"
+        ],
+        "radius": [
+          "12px",
+          "50%",
+          "6px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "Deedglass – An agent said it updated 1 row; Postgres changed 301",
+      "url": "https://github.com/deedglass/deedglass",
+      "finalUrl": "https://github.com/deedglass/deedglass",
+      "hnId": 50337736,
+      "hnTime": "2026-11-02T15:02:04.000Z",
+      "score": 44,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 11,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Documentation site",
+        "score": 48
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:fdd1928d",
+          "string": "header@8 nav@12 main@6 header@9 nav@12 nav@10 header@20 nav@28 article@28 section@29 footer@4 nav@6",
+          "sequence": [
+            "header",
+            "nav",
+            "main",
+            "header",
+            "nav",
+            "nav",
+            "header",
+            "nav",
+            "article",
+            "section",
+            "footer",
+            "nav"
+          ],
+          "counts": {
+            "header": 3,
+            "nav": 5,
+            "main": 1,
+            "section": 1,
+            "article": 1,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 850,
+          "maxDepth": 36,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 190,
+            "4": 12,
+            "5": 35,
+            "6": 20,
+            "7": 46,
+            "8": 23,
+            "9": 19,
+            "10": 10,
+            "11": 13,
+            "12": 2964
+          }
+        },
+        "sections": [
+          "hero",
+          "footer"
+        ],
+        "palette": [
+          "#aadddd",
+          "#000000",
+          "#1e2327"
+        ],
+        "fonts": [],
+        "radius": [
+          "4px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "The Public Eye – Agentic search for congressional bill legibility",
+      "url": "https://the-public-eye.com",
+      "finalUrl": "https://the-public-eye.com/",
+      "hnId": 50337363,
+      "hnTime": "2026-11-02T14:33:24.000Z",
+      "score": 40,
+      "verdict": "Mild",
+      "fails": 1,
+      "warns": 7,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Coming soon / waitlist",
+        "score": 53
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:ea29c66c",
+          "string": "nav@6 main@6 section@8 nav@12 section@10×4 nav@10 footer@5",
+          "sequence": [
+            "nav",
+            "main",
+            "section",
+            "nav",
+            "section",
+            "section",
+            "section",
+            "section",
+            "nav",
+            "footer"
+          ],
+          "counts": {
+            "header": 0,
+            "nav": 3,
+            "main": 1,
+            "section": 5,
+            "article": 0,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 30,
+          "maxDepth": 18,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 20,
+            "4": 1,
+            "5": 4,
+            "6": 4,
+            "7": 7,
+            "8": 4,
+            "9": 6,
+            "10": 13,
+            "11": 43,
+            "12": 240
+          }
+        },
+        "sections": [
+          "hero"
+        ],
+        "palette": [
+          "#b0e9d2",
+          "#ffffff",
+          "#0b141a",
+          "#122128",
+          "#3ee68c",
+          "#111f27"
+        ],
+        "fonts": [
+          "Arial",
+          "Cambria",
+          "Consolas",
+          "Courier New",
+          "Georgia",
+          "Helvetica Neue",
+          "Inter Fallback",
+          "Inter Variable",
+          "Liberation Mono",
+          "Menlo",
+          "Monaco",
+          "Roboto",
+          "Segoe UI",
+          "SFMono-Regular",
+          "Source Serif 4 Variable",
+          "Source Serif Fallback",
+          "Times New Roman"
+        ],
+        "radius": [
+          "10px",
+          "999px",
+          "12px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "SpotKat – a free cat register with a lost-cat network",
+      "url": "https://spotkat.nl/en",
+      "finalUrl": "https://spotkat.nl/en",
+      "hnId": 50333971,
+      "hnTime": "2026-11-02T07:16:37.000Z",
+      "score": 32,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 8,
+      "stylesheetsScanned": 1,
+      "topTwin": {
+        "name": "Minimal portfolio",
+        "score": 46
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:e5dba672",
+          "string": "section@4 header@5 nav@8 section@4×5 footer@4 nav@7×2",
+          "sequence": [
+            "section",
+            "header",
+            "nav",
+            "section",
+            "section",
+            "section",
+            "section",
+            "section",
+            "footer",
+            "nav",
+            "nav"
+          ],
+          "counts": {
+            "header": 1,
+            "nav": 3,
+            "main": 0,
+            "section": 6,
+            "article": 0,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 70,
+          "maxDepth": 13,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 45,
+            "4": 7,
+            "5": 13,
+            "6": 26,
+            "7": 27,
+            "8": 34,
+            "9": 46,
+            "10": 46,
+            "11": 24,
+            "12": 11
+          }
+        },
+        "sections": [
+          "faq",
+          "features-grid",
+          "footer"
+        ],
+        "palette": [
+          "#ffffff",
+          "#19251b",
+          "#000000",
+          "#0f2436",
+          "#206133",
+          "#307e46"
+        ],
+        "fonts": [
+          "Apple Color Emoji",
+          "Arial",
+          "Consolas",
+          "Courier New",
+          "Helvetica Neue",
+          "Liberation Mono",
+          "Menlo",
+          "Monaco",
+          "monospace)",
+          "Noto Color Emoji)",
+          "Noto Sans",
+          "nunito",
+          "nunito Fallback",
+          "nunitoSans",
+          "nunitoSans Fallback",
+          "Roboto",
+          "Segoe UI",
+          "Segoe UI Emoji",
+          "Segoe UI Symbol",
+          "SFMono-Regular"
+        ],
+        "radius": [
+          "4px",
+          "9999px",
+          "2rem"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "How Enigma worked and was cracked, explained with moving figures",
+      "url": "https://www.readfp.com/chapters/how-enigma-was-cracked",
+      "finalUrl": "https://www.readfp.com/chapters/how-enigma-was-cracked",
+      "hnId": 50334769,
+      "hnTime": "2026-11-02T09:40:15.000Z",
+      "score": 28,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 7,
+      "stylesheetsScanned": 3,
+      "topTwin": {
+        "name": "Minimal portfolio",
+        "score": 49
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:c55f60a3",
+          "string": "aside@4 nav@5 nav@4 main@5 header@6 section@6×2",
+          "sequence": [
+            "aside",
+            "nav",
+            "nav",
+            "main",
+            "header",
+            "section",
+            "section"
+          ],
+          "counts": {
+            "header": 1,
+            "nav": 2,
+            "main": 1,
+            "section": 2,
+            "article": 0,
+            "aside": 1,
+            "footer": 0
+          },
+          "divs": 23,
+          "maxDepth": 13,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 43,
+            "4": 5,
+            "5": 8,
+            "6": 11,
+            "7": 26,
+            "8": 69,
+            "9": 312,
+            "10": 712,
+            "11": 1288,
+            "12": 787
+          }
+        },
+        "sections": [
+          "hero",
+          "features-grid"
+        ],
+        "palette": [
+          "#000000",
+          "#ffffff",
+          "#1f1f24",
+          "#ff9500",
+          "#26262a",
+          "#16161b"
+        ],
+        "fonts": [
+          "Consolas",
+          "departureMono",
+          "Menlo",
+          "Newsreader"
+        ],
+        "radius": [
+          "4px",
+          "3px",
+          "0"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "ClickBench inspired leaderboard for multiple database benchmarks",
+      "url": "https://benchmark.pivotlake.io/",
+      "finalUrl": "https://benchmark.pivotlake.io/",
+      "hnId": 50337773,
+      "hnTime": "2026-11-02T15:05:23.000Z",
+      "score": 24,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 6,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Coming soon / waitlist",
+        "score": 52
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:ad0d01dc",
+          "string": "",
+          "sequence": [],
+          "counts": {
+            "header": 0,
+            "nav": 0,
+            "main": 0,
+            "section": 0,
+            "article": 0,
+            "aside": 0,
+            "footer": 0
+          },
+          "divs": 4,
+          "maxDepth": 7,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 14,
+            "4": 14,
+            "5": 12,
+            "6": 2,
+            "7": 3
+          }
+        },
+        "sections": [
+          "hero"
+        ],
+        "palette": [
+          "#1b1b1f",
+          "#0f766e",
+          "#2a2d34",
+          "#3a3e47",
+          "#000000",
+          "#0b1f1c"
+        ],
+        "fonts": [
+          "Consolas",
+          "Inter",
+          "Menlo",
+          "Segoe UI"
+        ],
+        "radius": [
+          "0.5rem",
+          "0.6rem",
+          "2px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "Diwali in threejs – find crackers and send wishes into a shared sky",
+      "url": "https://virtualdiwali.com/",
+      "finalUrl": "https://virtualdiwali.com/",
+      "hnId": 50332869,
+      "hnTime": "2026-11-02T03:40:08.000Z",
+      "score": 20,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 5,
+      "stylesheetsScanned": 2,
+      "topTwin": {
+        "name": "E-commerce product page",
+        "score": 7
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:ab34088a",
+          "string": "",
+          "sequence": [],
+          "counts": {
+            "header": 0,
+            "nav": 0,
+            "main": 0,
+            "section": 0,
+            "article": 0,
+            "aside": 0,
+            "footer": 0
+          },
+          "divs": 3,
+          "maxDepth": 4,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 33,
+            "4": 2
+          }
+        },
+        "sections": [],
+        "palette": [
+          "#ffd27a",
+          "#2a1020",
+          "#ff9a3c",
+          "#ffc77a",
+          "#fff3d2",
+          "#ffb347"
+        ],
+        "fonts": [
+          "Baloo 2",
+          "SF Pro Rounded",
+          "ui-rounded"
+        ],
+        "radius": [
+          "999px",
+          "50%",
+          "14px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "A SQL parser and type checker written in TypeScript types",
+      "url": "https://github.com/ismailkarsli/TypeSQL",
+      "finalUrl": "https://github.com/ismailkarsli/TypeSQL",
+      "hnId": 50337697,
+      "hnTime": "2026-11-02T14:58:44.000Z",
+      "score": 16,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 4,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Documentation site",
+        "score": 48
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:64f3a3b6",
+          "string": "header@8 nav@12 main@6 header@9 nav@12 nav@10 header@20 nav@28 article@28 footer@4 nav@6",
+          "sequence": [
+            "header",
+            "nav",
+            "main",
+            "header",
+            "nav",
+            "nav",
+            "header",
+            "nav",
+            "article",
+            "footer",
+            "nav"
+          ],
+          "counts": {
+            "header": 3,
+            "nav": 5,
+            "main": 1,
+            "section": 0,
+            "article": 1,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 398,
+          "maxDepth": 36,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 192,
+            "4": 12,
+            "5": 35,
+            "6": 20,
+            "7": 46,
+            "8": 23,
+            "9": 19,
+            "10": 10,
+            "11": 13,
+            "12": 1456
+          }
+        },
+        "sections": [
+          "hero",
+          "footer"
+        ],
+        "palette": [
+          "#000000",
+          "#1e2327"
+        ],
+        "fonts": [],
+        "radius": [
+          "4px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "A2Flow – A workflow engine built around \"Agent as Workflow\"",
+      "url": "https://kaitoy.github.io/a2flow/",
+      "finalUrl": "https://kaitoy.github.io/a2flow/",
+      "hnId": 50337374,
+      "hnTime": "2026-11-02T14:34:00.000Z",
+      "score": 16,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 4,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Documentation site",
+        "score": 53
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:5df345c0",
+          "string": "nav@4 nav@6 section@6×7 footer@4",
+          "sequence": [
+            "nav",
+            "nav",
+            "section",
+            "section",
+            "section",
+            "section",
+            "section",
+            "section",
+            "section",
+            "footer"
+          ],
+          "counts": {
+            "header": 0,
+            "nav": 2,
+            "main": 0,
+            "section": 7,
+            "article": 0,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 109,
+          "maxDepth": 19,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 28,
+            "4": 6,
+            "5": 6,
+            "6": 13,
+            "7": 23,
+            "8": 29,
+            "9": 57,
+            "10": 91,
+            "11": 79,
+            "12": 254
+          }
+        },
+        "sections": [
+          "hero",
+          "footer"
+        ],
+        "palette": [
+          "#ffffff",
+          "#aa22ff",
+          "#ffe6b3"
+        ],
+        "fonts": [
+          "Inter",
+          "JetBrains Mono",
+          "Space Grotesk"
+        ],
+        "radius": [],
+        "shadows": false
+      }
+    },
+    {
+      "name": "Aulico, my free tradingview alternative",
+      "url": "https://www.aulico.com",
+      "finalUrl": "https://www.aulico.com/",
+      "hnId": 50337410,
+      "hnTime": "2026-11-02T14:36:13.000Z",
+      "score": 16,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 4,
+      "stylesheetsScanned": 1,
+      "topTwin": {
+        "name": "Minimal portfolio",
+        "score": 23
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:902e24ca",
+          "string": "",
+          "sequence": [],
+          "counts": {
+            "header": 0,
+            "nav": 0,
+            "main": 0,
+            "section": 0,
+            "article": 0,
+            "aside": 0,
+            "footer": 0
+          },
+          "divs": 1,
+          "maxDepth": 3,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 24
+          }
+        },
+        "sections": [],
+        "palette": [
+          "#ececec",
+          "#fafafa",
+          "#171717",
+          "#ffffff",
+          "#0d0d0d",
+          "#131313"
+        ],
+        "fonts": [
+          "Arial",
+          "Helvetica Neue",
+          "Segoe UI"
+        ],
+        "radius": [
+          "999px",
+          "9px",
+          "11px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "NetIntel – Deterministic Operational Intelliegence for Linux",
+      "url": "https://ni.gnsoftlab.com/releases/1.0.0/",
+      "finalUrl": "https://ni.gnsoftlab.com/releases/1.0.0/",
+      "hnId": 50337364,
+      "hnTime": "2026-11-02T14:33:25.000Z",
+      "score": 16,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 4,
+      "stylesheetsScanned": 2,
+      "topTwin": {
+        "name": "Minimal portfolio",
+        "score": 53
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:62985973",
+          "string": "header@3 nav@4 main@3 section@4 article@6×2 section@4×3 footer@3",
+          "sequence": [
+            "header",
+            "nav",
+            "main",
+            "section",
+            "article",
+            "article",
+            "section",
+            "section",
+            "section",
+            "footer"
+          ],
+          "counts": {
+            "header": 1,
+            "nav": 1,
+            "main": 1,
+            "section": 4,
+            "article": 2,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 24,
+          "maxDepth": 9,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 11,
+            "4": 12,
+            "5": 31,
+            "6": 38,
+            "7": 40,
+            "8": 26,
+            "9": 2
+          }
+        },
+        "sections": [
+          "hero",
+          "features-grid",
+          "footer"
+        ],
+        "palette": [
+          "#0b1320",
+          "#080d17",
+          "#0a111d",
+          "#0c1421",
+          "#101a2a",
+          "#56e4f5"
+        ],
+        "fonts": [
+          "DM Mono",
+          "Manrope"
+        ],
+        "radius": [
+          "50%",
+          "9px",
+          "7px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "Slop Node for Keeta",
+      "url": "https://github.com/xescure/slop-node",
+      "finalUrl": "https://github.com/xescure/slop-node",
+      "hnId": 50337688,
+      "hnTime": "2026-11-02T14:58:19.000Z",
+      "score": 16,
+      "verdict": "Mild",
+      "fails": 0,
+      "warns": 4,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Documentation site",
+        "score": 50
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:a1191ad1",
+          "string": "header@8 nav@12 main@6 header@9 nav@12 nav@10 header@20 nav@28 article@28 section@29×2 footer@4 nav@6",
+          "sequence": [
+            "header",
+            "nav",
+            "main",
+            "header",
+            "nav",
+            "nav",
+            "header",
+            "nav",
+            "article",
+            "section",
+            "section",
+            "footer",
+            "nav"
+          ],
+          "counts": {
+            "header": 3,
+            "nav": 5,
+            "main": 1,
+            "section": 2,
+            "article": 1,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 513,
+          "maxDepth": 36,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 192,
+            "4": 12,
+            "5": 35,
+            "6": 20,
+            "7": 46,
+            "8": 23,
+            "9": 19,
+            "10": 10,
+            "11": 13,
+            "12": 1722
+          }
+        },
+        "sections": [
+          "hero",
+          "footer"
+        ],
+        "palette": [
+          "#000000",
+          "#1e2327"
+        ],
+        "fonts": [],
+        "radius": [
+          "4px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "Is Software Solved?",
+      "url": "https://issoftwaresolved.com/",
+      "finalUrl": "https://issoftwaresolved.com/",
+      "hnId": 50336349,
+      "hnTime": "2026-11-02T13:08:46.000Z",
+      "score": 12,
+      "verdict": "Clean",
+      "fails": 0,
+      "warns": 3,
+      "stylesheetsScanned": 1,
+      "topTwin": {
+        "name": "Minimal portfolio",
+        "score": 55
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:7eb9e21d",
+          "string": "header@3 nav@5 main@3 section@4×2 footer@3 nav@5",
+          "sequence": [
+            "header",
+            "nav",
+            "main",
+            "section",
+            "section",
+            "footer",
+            "nav"
+          ],
+          "counts": {
+            "header": 1,
+            "nav": 2,
+            "main": 1,
+            "section": 2,
+            "article": 0,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 7,
+          "maxDepth": 7,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 15,
+            "4": 4,
+            "5": 11,
+            "6": 31,
+            "7": 10
+          }
+        },
+        "sections": [
+          "hero",
+          "footer"
+        ],
+        "palette": [
+          "#000000",
+          "#fffef9",
+          "#0a0a08",
+          "#204c30",
+          "#2c6540",
+          "#68685f"
+        ],
+        "fonts": [
+          "Geist Mono-19a486390118e74c",
+          "Geist Mono-19a486390118e74c fallback: Courier New",
+          "Geist-27042b97f4a8624f",
+          "Geist-27042b97f4a8624f fallback: Arial"
+        ],
+        "radius": [
+          "999px",
+          "50%",
+          "6px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "Vaire, Self-Hosting Postgres Through the One Glorious CLI",
+      "url": "https://github.com/mbvlabs/vaire",
+      "finalUrl": "https://github.com/mbvlabs/vaire",
+      "hnId": 50337525,
+      "hnTime": "2026-11-02T14:45:08.000Z",
+      "score": 12,
+      "verdict": "Clean",
+      "fails": 0,
+      "warns": 3,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Documentation site",
+        "score": 48
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:50671320",
+          "string": "header@8 nav@12 main@6 header@9 nav@12 nav@10 header@20 nav@28 article@28 footer@4 nav@6",
+          "sequence": [
+            "header",
+            "nav",
+            "main",
+            "header",
+            "nav",
+            "nav",
+            "header",
+            "nav",
+            "article",
+            "footer",
+            "nav"
+          ],
+          "counts": {
+            "header": 3,
+            "nav": 5,
+            "main": 1,
+            "section": 0,
+            "article": 1,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 386,
+          "maxDepth": 36,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 192,
+            "4": 12,
+            "5": 35,
+            "6": 20,
+            "7": 46,
+            "8": 23,
+            "9": 19,
+            "10": 10,
+            "11": 13,
+            "12": 2091
+          }
+        },
+        "sections": [
+          "hero",
+          "footer"
+        ],
+        "palette": [
+          "#000000",
+          "#1e2327"
+        ],
+        "fonts": [],
+        "radius": [
+          "4px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "Wikihack – HackerTube, but for Wikipedia articles mentioned on HN",
+      "url": "https://wikihack.netlify.app",
+      "finalUrl": "https://wikihack.netlify.app/",
+      "hnId": 50333339,
+      "hnTime": "2026-11-02T05:06:30.000Z",
+      "score": 12,
+      "verdict": "Clean",
+      "fails": 0,
+      "warns": 3,
+      "stylesheetsScanned": 1,
+      "topTwin": {
+        "name": "Minimal portfolio",
+        "score": 16
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:95dca54e",
+          "string": "",
+          "sequence": [],
+          "counts": {
+            "header": 0,
+            "nav": 0,
+            "main": 0,
+            "section": 0,
+            "article": 0,
+            "aside": 0,
+            "footer": 0
+          },
+          "divs": 1,
+          "maxDepth": 3,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 8
+          }
+        },
+        "sections": [],
+        "palette": [
+          "#000000",
+          "#ffffff",
+          "#121212",
+          "#262626",
+          "#8d8d86",
+          "#ff6600"
+        ],
+        "fonts": [],
+        "radius": [
+          "3px",
+          "50%",
+          "10px"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "Better Together – AI agents team up against spam calls and texts",
+      "url": "https://better-together.fun/",
+      "finalUrl": "https://better-together.fun/",
+      "hnId": 50331415,
+      "hnTime": "2026-11-02T00:19:11.000Z",
+      "score": 4,
+      "verdict": "Clean",
+      "fails": 0,
+      "warns": 1,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Documentation site",
+        "score": 55
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:ca740c0c",
+          "string": "header@3 nav@4 main@3 section@6 section@4×4 section@6 footer@3 nav@4",
+          "sequence": [
+            "header",
+            "nav",
+            "main",
+            "section",
+            "section",
+            "section",
+            "section",
+            "section",
+            "section",
+            "footer",
+            "nav"
+          ],
+          "counts": {
+            "header": 1,
+            "nav": 2,
+            "main": 1,
+            "section": 6,
+            "article": 0,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 43,
+          "maxDepth": 15,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 22,
+            "4": 9,
+            "5": 18,
+            "6": 25,
+            "7": 44,
+            "8": 47,
+            "9": 26,
+            "10": 43,
+            "11": 37,
+            "12": 101
+          }
+        },
+        "sections": [
+          "hero",
+          "footer"
+        ],
+        "palette": [
+          "#1c1a16",
+          "#fbf7ee",
+          "#000000",
+          "#151410",
+          "#ffffff",
+          "#0b6b4f"
+        ],
+        "fonts": [
+          "Fraunces"
+        ],
+        "radius": [
+          "var(--radius-lg)",
+          "var(--radius-md)",
+          "50%"
+        ],
+        "shadows": true
+      }
+    },
+    {
+      "name": "I've updated my Linux System Call website and API",
+      "url": "https://syscall.sh/",
+      "finalUrl": "https://syscall.sh/",
+      "hnId": 50334704,
+      "hnTime": "2026-11-02T09:29:16.000Z",
+      "score": 0,
+      "verdict": "Clean",
+      "fails": 0,
+      "warns": 0,
+      "stylesheetsScanned": 0,
+      "topTwin": {
+        "name": "Minimal portfolio",
+        "score": 39
+      },
+      "fingerprint": {
+        "version": 1,
+        "skeleton": {
+          "id": "skel:0e413bf0",
+          "string": "header@4 nav@5 main@4 footer@4",
+          "sequence": [
+            "header",
+            "nav",
+            "main",
+            "footer"
+          ],
+          "counts": {
+            "header": 1,
+            "nav": 1,
+            "main": 1,
+            "section": 0,
+            "article": 0,
+            "aside": 0,
+            "footer": 1
+          },
+          "divs": 5,
+          "maxDepth": 10,
+          "depthHist": {
+            "1": 1,
+            "2": 2,
+            "3": 26,
+            "4": 3,
+            "5": 23,
+            "6": 48,
+            "7": 40,
+            "8": 118,
+            "9": 280,
+            "10": 54
+          }
+        },
+        "sections": [
+          "footer"
+        ],
+        "palette": [
+          "#000000",
+          "#1f222a",
+          "#ff6266",
+          "#ffffff",
+          "#78e2a0",
+          "#1d212c"
+        ],
+        "fonts": [
+          "Consolas",
+          "Fira Code",
+          "Monaco",
+          "Ubuntu Mono"
+        ],
+        "radius": [
+          "0"
+        ],
+        "shadows": true
+      }
+    }
+  ],
+  "failures": [
+    {
+      "name": "Roland T8 Interactive Tutorial",
+      "url": "https://roland-t8.fokion.online",
+      "hnId": 50333987,
+      "error": "the site answered HTTP 403"
+    }
+  ]
+}

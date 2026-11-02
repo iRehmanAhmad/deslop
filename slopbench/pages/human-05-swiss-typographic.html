@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Atelier Müller — Grafik und Typografie, Zürich</title>
+<style>
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0; color: #111111; background: #ffffff; }
+  .red { color: #e30613; }
+  header { display: flex; justify-content: space-between; padding: 20px 40px; font-size: 13px; }
+  .mega { font-size: 148px; line-height: 0.95; font-weight: 700; letter-spacing: -4px; margin: 30px 40px 10px; }
+  .grid { display: grid; grid-template-columns: 180px 1fr 1fr; gap: 0 40px; padding: 0 40px; }
+  .num { font-size: 13px; border-top: 2px solid #111111; padding-top: 8px; }
+  section { border-top: 1px solid #111111; padding: 26px 0 34px; }
+  h2 { font-size: 34px; margin: 0 0 10px; font-weight: 700; letter-spacing: -0.5px; }
+  p { font-size: 16px; line-height: 1.45; max-width: 46ch; margin: 0 0 10px; }
+  ul { list-style: none; padding: 0; margin: 0; font-size: 16px; line-height: 1.9; }
+  .rule-red { border-top: 10px solid #e30613; }
+  footer { padding: 18px 40px 30px; font-size: 13px; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<header>
+  <span>Atelier Müller</span>
+  <span>Geroldstrasse 5, 8005 Zürich</span>
+  <span class="red">Seit 1994</span>
+</header>
+<div class="rule-red"></div>
+<h1 class="mega">Grafik ist<br>Ordnung<span class="red">.</span></h1>
+<p style="margin:0 40px 50px;font-size:19px;max-width:60ch;">Wir gestalten Drucksachen und Websites für Verlage, Museen und eine Bäckerei, die uns seit zwanzig Jahren nicht bezahlt hat. (Wir machen es trotzdem. Das Brot ist gut.)</p>
+
+<main class="grid">
+  <div class="num">01 / Arbeit</div>
+  <section style="grid-column:2 / 4;">
+    <h2>Ausgewählte Projekte</h2>
+    <ul>
+      <li>Plakatserie, Museum für Gestaltung — 2024</li>
+      <li>Jahresbericht, Stiftung Pro Helvetia — 2023</li>
+      <li>Verpackung, Bäckerei Frehner — seit 2005</li>
+      <li>Wegleitung, Zoo Zürich — 2025, 214 Schilder</li>
+    </ul>
+  </section>
+
+  <div class="num">02 / Methode</div>
+  <section style="grid-column:2 / 4;">
+    <h2>Ein Raster. Zwei Schriften. Keine Dekoration.</h2>
+    <p>Jedes Projekt beginnt mit einem Raster und einer Frage: Was muss der Leser in drei Sekunden wissen? Alles, was dieser Antwort nicht dient, wird entfernt. Der Rest ist Satz, und Satz ist Handwerk.</p>
+  </section>
+
+  <div class="num">03 / Kontakt</div>
+  <section style="grid-column:2 / 4;">
+    <h2>Brief genügt</h2>
+    <p>Schreiben Sie an <a href="mailto:post@atelier-mueller.example" style="color:#111111;">post@atelier-mueller.example</a>. Eine Seite reicht. Wir antworten innert fünf Arbeitstagen, mit einer Einschätzung und einem Preis, nicht mit einem Formular.</p>
+  </section>
+</main>
+<footer>
+  <span>© 2026 Atelier Müller GmbH</span>
+  <span>45,5673° N, 8,5199° O</span>
+</footer>
+</body>
+</html>
