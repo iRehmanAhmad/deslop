@@ -280,6 +280,209 @@ function interFindings(lines, rel) {
   return out;
 }
 
+/* ------------------------------------------------------------------ */
+/* RTL pack — Urdu / Arabic (and other right-to-left) UI               */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The Western anti-slop canon is blind in right-to-left: its rules assume
+ * an LTR, Latin-script page. The RTL pack activates only on files that
+ * show an RTL signal (Arabic-script text, lang="ur"/"ar", dir="rtl" or
+ * direction: rtl), and flags the mistakes agents make when they generate
+ * Urdu/Arabic UI with LTR habits: no dir attribute, Latin display fonts
+ * sitting on Arabic script, physical left/right properties that do not
+ * flip, hard-coded Latin dates inside Arabic copy, un-mirrored icons.
+ */
+
+const ARABIC_SCRIPT_RE = /[\u0600-\u06FF]/;
+/** Characters that mark the text as Urdu specifically (ٹ ڈ ڑ ں ھ ے). */
+const URDU_CHARS_RE = /[\u0679\u0688\u0691\u06BA\u06BE\u06D2]/;
+const RTL_LANG_RE = /\blang\s*=\s*["'](ur|ar)\b/i;
+
+/** Latin display faces with no Arabic glyphs — the LTR default wardrobe. */
+const LATIN_DISPLAY_FONTS = [
+  "inter", "roboto", "poppins", "montserrat", "space grotesk", "open sans",
+  "lato", "raleway", "oswald", "nunito", "work sans", "dm sans", "manrope",
+  "sora", "geist", "plus jakarta sans", "source sans", "quicksand",
+  "playfair display", "fraunces", "instrument serif", "bebas neue",
+];
+/** Typefaces that actually carry Arabic script. */
+const ARABIC_CAPABLE_FONTS = [
+  "noto nastaliq", "noto naskh", "noto sans arabic", "noto urdu", "nastaliq",
+  "amiri", "scheherazade", "vazirmatn", "gulzar", "mehr nastaliq",
+  "alvi nastaleeq", "nafees", "urdu typesetting", "ibm plex sans arabic",
+  "tajawal", "cairo", "lateef", "harmattan", "mirza", "aref ruqaa",
+  "reem kufi", "markazi text",
+];
+/** Nastaliq faces — what Urdu readers expect for display text. */
+const NASTALIQ_FONTS = [
+  "noto nastaliq", "gulzar", "mehr nastaliq", "alvi nastaleeq",
+  "nafees nastaleeq", "urdu typesetting", "nastaliq",
+];
+/** Naskh faces — correct for Arabic, the wrong default for Urdu display. */
+const NASKH_FONTS = [
+  "noto naskh arabic", "amiri", "scheherazade", "noto sans arabic",
+  "traditional arabic", "sakkal majalla",
+];
+
+function fontStacks(lines) {
+  const re = /(?:font-family|--[\w-]*font[\w-]*)\s*:\s*([^;}]+)/g;
+  const stacks = [];
+  lines.forEach((line, i) => {
+    let m;
+    re.lastIndex = 0;
+    while ((m = re.exec(line)) !== null) {
+      if (m[1].includes("var(")) continue; // unresolved token reference
+      const named = m[1]
+        .split(",")
+        .map((s) => s.trim().replace(/["']/g, "").toLowerCase())
+        .filter(Boolean);
+      stacks.push({ line: i + 1, named });
+    }
+  });
+  return stacks;
+}
+
+function stackHas(stack, fonts) {
+  return stack.named.some((name) => fonts.some((f) => name.includes(f)));
+}
+
+function rtlFindings(lines, content, rel, ext) {
+  const out = [];
+  const hasArabicScript = ARABIC_SCRIPT_RE.test(content);
+  const langMatch = content.match(RTL_LANG_RE);
+  const hasRtlDir =
+    /\bdir\s*=\s*["']rtl["']/i.test(content) || /\bdir=\{\s*["']rtl["']\s*\}/.test(content);
+  const hasCssRtl = /direction\s*:\s*rtl\b/.test(content);
+  const isRTL = hasArabicScript || !!langMatch || hasRtlDir || hasCssRtl;
+  if (!isRTL) return out;
+
+  const isUrdu = (langMatch && langMatch[1].toLowerCase() === "ur") || URDU_CHARS_RE.test(content);
+  const stacks = fontStacks(lines);
+  const push = (line, rule, severity, message, hint) =>
+    out.push({ file: rel, line, rule, severity, message, hint });
+
+  /* rtl-missing-dir (fail) — markup with RTL content but nothing flips it. */
+  if (MARKUP_EXTENSIONS.has(ext) && (hasArabicScript || langMatch) && !hasRtlDir && !hasCssRtl) {
+    const anchor = langMatch
+      ? firstLineMatching(lines, RTL_LANG_RE)
+      : firstLineMatching(lines, ARABIC_SCRIPT_RE);
+    push(anchor, "rtl-missing-dir", "fail",
+      "Arabic-script / RTL-language content with no dir=\"rtl\" — the browser will lay it out left-to-right",
+      "Add dir=\"rtl\" to the <html> element (or the container of the RTL content). Without it, text order, alignment and layout all run the wrong way.");
+  }
+
+  /* Font rules — only meaningful once the file carries Arabic script. */
+  if (hasArabicScript) {
+    if (stacks.length === 0) {
+      push(firstLineMatching(lines, ARABIC_SCRIPT_RE), "rtl-font-missing", "warn",
+        "Arabic-script text with no font-family declared anywhere — it falls back to whatever the platform default happens to be",
+        "Declare a font with real Arabic support (Noto Nastaliq Urdu for Urdu display text, Noto Naskh Arabic for Arabic). Platform fallbacks render Urdu especially badly.");
+    }
+    for (const stack of stacks) {
+      if (stackHas(stack, LATIN_DISPLAY_FONTS) && !stackHas(stack, ARABIC_CAPABLE_FONTS)) {
+        push(stack.line, "rtl-latin-display-font", "warn",
+          "Latin-only display font set on content that includes Arabic script — the Arabic text falls back to a mismatched system font",
+          "Pair the Latin face with an Arabic-capable one in the same stack (e.g. 'Poppins', 'Noto Nastaliq Urdu', sans-serif), or set the Arabic content in its own font.");
+      }
+    }
+    if (isUrdu && !stacks.some((s) => stackHas(s, NASTALIQ_FONTS))) {
+      const naskh = stacks.find((s) => stackHas(s, NASKH_FONTS));
+      if (naskh) {
+        push(naskh.line, "urdu-naskh-for-nastaleeq", "warn",
+          "Urdu text set in a Naskh typeface with no Nastaliq option — readable, but it reads as Arabic, not Urdu",
+          "Urdu readers expect Nastaliq for display text: add 'Noto Nastaliq Urdu' (or Gulzar / Mehr Nastaliq) for headings and keep Naskh, if you like, for dense body text.");
+      }
+    }
+  }
+
+  /* rtl-text-align-left — forced left alignment on RTL body text. */
+  if (hasArabicScript || langMatch) {
+    const alignLines = lines.filter(
+      (l) => /text-align\s*:\s*left\b/.test(l) || /\btext-left\b/.test(l)
+    );
+    if (alignLines.length > 0) {
+      push(firstLineMatching(lines, /text-align\s*:\s*left\b|\btext-left\b/),
+        "rtl-text-align-left", "warn",
+        `text-align: left forced ${alignLines.length} time(s) in an RTL file — Urdu/Arabic body text gets pinned to the wrong edge`,
+        "Use text-align: start (or text-start / [dir]-aware alignment) so text begins at the inline start — the right edge in RTL. Reserve explicit left for genuine LTR islands like code.");
+    }
+  }
+
+  /* rtl-physical-properties — one aggregated finding per file. */
+  {
+    const cssRe = /(?:margin|padding|border|inset)-(?:left|right)\b|(?:^|[;{])\s*(?:left|right)\s*:/;
+    const twRe = /\b(?:m[lr]|p[lr])-(?:auto|\d+|\[)|\b(?:left|right)-(?:\d+|\[|auto|full)|\bborder-[lr](?:-\d+)?\b/;
+    let count = 0;
+    let anchor = 1;
+    lines.forEach((line, i) => {
+      const n = (line.match(new RegExp(cssRe.source, "g")) || []).length +
+        (line.match(new RegExp(twRe.source, "g")) || []).length;
+      if (n > 0) {
+        if (count === 0) anchor = i + 1;
+        count += n;
+      }
+    });
+    if (count >= 2) {
+      push(anchor, "rtl-physical-properties", "warn",
+        `${count} physical left/right properties in an RTL file — margins, padding and positions that do not flip when direction flips`,
+        "Use logical properties: margin-inline-start/end, padding-inline, inset-inline, border-inline-start. They follow the writing direction automatically.");
+    }
+  }
+
+  /* rtl-gradient-direction — hard-coded physical gradient direction. */
+  lines.forEach((line, i) => {
+    if (/(?:linear|radial)-gradient\(\s*(?:to\s+(?:top\s+|bottom\s+)?(?:right|left))\b/.test(line) ||
+        /\bbg-(?:gradient|linear)-to-[lr]\b/.test(line)) {
+      push(i + 1, "rtl-gradient-direction", "warn",
+        "Gradient with a hard-coded physical direction (to right / to left) in an RTL file — the highlight runs backwards against the reading direction",
+        "Use logical endpoints (to inline-end / to inline-start), or a vertical/symmetric gradient that has no reading direction.");
+    }
+  });
+
+  /* rtl-icon-direction — directional icons with no mirroring anywhere. */
+  {
+    const iconRe = /\bfa-(?:arrow|chevron|angle|caret)-(?:left|right)\b|\b(?:arrow_forward|arrow_back|arrow_forward_ios|arrow_back_ios|chevron_left|chevron_right|keyboard_arrow_left|keyboard_arrow_right)\b|\b-?translate-x-\d+\b/;
+    let count = 0;
+    let anchor = 1;
+    lines.forEach((line, i) => {
+      if (iconRe.test(line)) {
+        if (count === 0) anchor = i + 1;
+        count += 1;
+      }
+    });
+    const mirrored =
+      /\brtl:/.test(content) || /\[dir\s*=\s*["']?rtl/.test(content) ||
+      /scaleX\(\s*-1\s*\)/.test(content) || /-scale-x-\d+/.test(content) ||
+      /scale-x-\[-1\]/.test(content);
+    if (count > 0 && !mirrored) {
+      push(anchor, "rtl-icon-direction", "warn",
+        `${count} directional icon/animation cue(s) (arrows, chevrons, translate-x) in an RTL file, with no mirroring anywhere — 'next' will point backwards`,
+        "Mirror directional icons in RTL: a scaleX(-1) flip under [dir=\"rtl\"], Tailwind's rtl: variant (-scale-x-100), or a direction-aware icon choice. Media controls and logos stay unflipped.");
+    }
+  }
+
+  /* rtl-latin-digits-dates — Latin-format dates written into Arabic copy. */
+  if (MARKUP_EXTENSIONS.has(ext)) {
+    const dateRe = /\b\d{1,2}\/\d{1,2}\/\d{2,4}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2},?\s+\d{4}\b/;
+    let count = 0;
+    let anchor = 1;
+    lines.forEach((line, i) => {
+      if (ARABIC_SCRIPT_RE.test(line) && dateRe.test(line)) {
+        if (count === 0) anchor = i + 1;
+        count += 1;
+      }
+    });
+    if (count > 0) {
+      push(anchor, "rtl-latin-digits-dates", "warn",
+        `${count} line(s) mix a hard-coded Latin-format date into Arabic-script copy — the format (and often the digits) will not match how the reader writes dates`,
+        "Format dates at runtime with Intl.DateTimeFormat('ur' / 'ar') so order, month names and digits localise; never bake 'MM/DD/YYYY' or 'November 2, 2026' into RTL UI strings.");
+    }
+  }
+
+  return out;
+}
+
 /** File-level rules: aggregate counts over the whole file. */
 const FILE_RULES = [
   {
@@ -410,6 +613,8 @@ function scanFile(file, rootLabel) {
   });
 
   findings.push(...interFindings(lines, rel));
+
+  findings.push(...rtlFindings(lines, content, rel, ext));
 
   for (const rule of FILE_RULES) {
     if (rule.markupOnly && !MARKUP_EXTENSIONS.has(ext)) continue;

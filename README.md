@@ -14,8 +14,9 @@ line, and how to fix it — *before* the agent calls the UI done.
 
 ## What it catches
 
-31 rules: 4 `fail` (Inter as the only font, purple-to-blue gradients in CSS
-or Tailwind, lorem ipsum shipped to production) and 27 `warn` (gradient
+40 rules: 5 `fail` (Inter as the only font, purple-to-blue gradients in CSS
+or Tailwind, lorem ipsum shipped to production, an RTL page with no
+`dir="rtl"`) and 35 `warn` (gradient
 text, glassmorphism, giant radii and shadows, emoji in the UI, checkmark
 feature lists, "Welcome to" heroes, "Get Started" buttons, "Trusted by
 10,000+ happy customers", em-dash overuse, div soup, `transition: all`,
@@ -23,6 +24,26 @@ focus outlines deleted with no replacement, and more).
 
 Every rule is documented — why it reads as AI slop and how to fix it — in
 [docs/RULES.md](docs/RULES.md).
+
+## The RTL pack — the blind spot every other scanner has
+
+**deslop is the first anti-slop scanner that can read RTL.** The whole
+Western anti-slop canon assumes your page is left-to-right and
+Latin-script. Point those tools at an Urdu or Arabic page and they see
+nothing — while the agent that generated it shipped a page with no
+`dir="rtl"`, Urdu set in a Latin display font's fallback, margins and
+arrows that never flipped, and `11/02/2026` baked into Arabic sentences.
+
+The RTL pack (9 rules, in
+[docs/RULES.md](docs/RULES.md#rtl-pack--urdu--arabic-right-to-left))
+catches exactly that: missing `dir`, Latin-only fonts on Arabic script,
+Urdu set in Naskh with no Nastaliq, forced `text-align: left`, physical
+left/right properties, backwards gradients, un-mirrored icons, and
+hard-coded Latin dates. It activates automatically on any file containing
+Arabic-script text, `lang="ur"`/`lang="ar"`, `dir="rtl"` or
+`direction: rtl` — no flag, no config — and stays silent everywhere else.
+Try it: `fixtures/rtl-sloppy.html` (1 fail, 7 warnings) vs
+`fixtures/rtl-clean.html` (0 findings).
 
 ## Example
 

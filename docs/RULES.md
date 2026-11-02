@@ -1,8 +1,14 @@
 # deslop rules
 
-31 rules: 4 `fail` (block "done" until fixed) and 27 `warn` (fix, or justify
+40 rules: 5 `fail` (block "done" until fixed) and 35 `warn` (fix, or justify
 in one line against the project's design system). Each entry says why the
 pattern reads as AI-generated and how to fix it.
+
+The last section is the **RTL pack**: 9 rules for Urdu/Arabic
+(right-to-left) UI that the Western anti-slop canon cannot see, because it
+assumes every page is LTR and Latin-script. They activate automatically on
+files that contain Arabic-script text, `lang="ur"`/`lang="ar"`, `dir="rtl"`
+or `direction: rtl` — and stay silent everywhere else.
 
 ## Fail rules
 
@@ -210,3 +216,102 @@ replacement.
 **Why:** keyboard users lose their place — a real harm hiding inside a
 "clean look" preference.
 **Fix:** style `:focus-visible` with a visible ring.
+
+## RTL pack — Urdu & Arabic (right-to-left)
+
+Every other rule in this document was written by and for the LTR web. But
+agents generate Urdu and Arabic pages with LTR habits baked in, and no
+Western scanner flags any of it — the page just ships broken for the
+people it was made for. These 9 rules close that blind spot.
+`rtl-missing-dir` is a `fail`; the rest are `warn`.
+
+### `rtl-missing-dir` (fail)
+**What:** markup containing Arabic-script text or `lang="ur"`/`lang="ar"`,
+with no `dir="rtl"` attribute and no `direction: rtl` anywhere.
+**Why it reads as slop:** the generator wrote the words but never flipped
+the page. Text order, alignment and layout all run left-to-right, so the
+page is not merely unstylish — it is assembled backwards.
+**Fix:** `dir="rtl"` on the `<html>` element (or on the container of the
+RTL content).
+
+### `rtl-font-missing`
+**What:** Arabic-script text in a file that declares no `font-family`
+at all.
+**Why:** the text falls back to whatever the platform default happens to
+be — and default fallbacks render Urdu's joined, stacked letterforms
+especially badly.
+**Fix:** declare a font with real Arabic support: Noto Nastaliq Urdu for
+Urdu, Noto Naskh Arabic for Arabic.
+
+### `rtl-latin-display-font`
+**What:** a Latin-only display face (Inter, Poppins, Montserrat, Space
+Grotesk, Playfair Display…) in a font stack, in a file containing
+Arabic-script text, with no Arabic-capable font in the same stack.
+**Why:** the Latin words get the chosen display face; the Urdu/Arabic
+words silently fall back to a mismatched system font. Two typefaces, two
+voices, neither chosen for the script that matters most on the page.
+**Fix:** pair the Latin face with an Arabic-capable one in the same stack
+(`'Poppins', 'Noto Nastaliq Urdu', sans-serif`), or style the Arabic
+content in its own font.
+
+### `urdu-naskh-for-nastaleeq`
+**What:** Urdu content (from `lang="ur"` or Urdu-specific letters like
+ٹ ڈ ڑ ھ ے) styled with a Naskh face (Noto Naskh Arabic, Amiri,
+Scheherazade…) and no Nastaliq face anywhere in the file.
+**Why:** Naskh is correct for Arabic, but Urdu readers expect the
+sloping, stacked Nastaliq for display text — an Urdu page in pure Naskh
+reads as Arabic wearing Urdu words.
+**Fix:** add a Nastaliq face (Noto Nastaliq Urdu, Gulzar, Mehr Nastaliq)
+for headings/display; Naskh can stay for dense body text if line height
+is a concern.
+
+### `rtl-text-align-left`
+**What:** `text-align: left` (or Tailwind `text-left`) in a file with
+Arabic-script / RTL-language content.
+**Why:** body text gets pinned to the left edge — the wrong edge. It is
+the single most visible "the generator forgot this page is RTL" tell.
+**Fix:** `text-align: start` (or `text-start`), which follows the writing
+direction. Reserve explicit `left` for genuine LTR islands like code
+blocks.
+
+### `rtl-physical-properties`
+**What:** 2+ physical left/right properties in an RTL file —
+`margin-left/right`, `padding-left/right`, `border-left/right`,
+`inset-left/right`, `left:`/`right:` positioning, or the Tailwind
+equivalents (`ml-*`, `pr-*`, `border-l`, `left-4`…). Reported once per
+file, with the count.
+**Why:** physical properties do not flip when direction flips, so the
+layout quietly mirrors wrong: the "start" card keeps the margin meant
+for the end.
+**Fix:** logical properties — `margin-inline-start/end`,
+`padding-inline`, `inset-inline`, `border-inline-start` — which follow
+the writing direction automatically.
+
+### `rtl-gradient-direction`
+**What:** a gradient with a hard-coded physical direction —
+`linear-gradient(to right, …)`, `to left`, or Tailwind
+`bg-gradient-to-r/l` — in an RTL file.
+**Why:** the highlight runs backwards against the reading direction: the
+eye is pulled toward where the text has already been.
+**Fix:** logical endpoints (`to inline-end` / `to inline-start`), or a
+vertical or symmetric gradient with no reading direction.
+
+### `rtl-icon-direction`
+**What:** directional cues — `fa-arrow-right`-style icon classes, Material
+icon names like `chevron_right`, or `translate-x-*` motion — in an RTL
+file, with no mirroring anywhere (no `rtl:` variant, no `[dir="rtl"]`
+flip rule, no `scaleX(-1)`).
+**Why:** "next" arrows and chevrons keep pointing left-to-right, so the
+interface's body language contradicts its text: forward points backwards.
+**Fix:** mirror directional icons under RTL (a `scaleX(-1)` flip scoped
+to `[dir="rtl"]`, or Tailwind's `rtl:-scale-x-100`). Media controls,
+logos and clocks stay unflipped — they are not directional.
+
+### `rtl-latin-digits-dates`
+**What:** a hard-coded Latin-format date — `11/02/2026`,
+`November 2, 2026` — written into a line of Arabic-script copy in markup.
+**Why:** the format (and often Western digits) is baked into a sentence
+whose reader writes dates the other way round; it is the RTL cousin of
+shipping lorem ipsum — a placeholder habit left in production copy.
+**Fix:** format dates at runtime with `Intl.DateTimeFormat('ur')` /
+`('ar')` so order, month names and digits localise.

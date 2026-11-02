@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>صاف مثال — درست RTL، نستعلیق کے ساتھ</title>
+<style>
+  :root {
+    --ink: #23201a;
+    --paper: #fdfaf3;
+    --accent: #7a4a21;
+    --line: #ddd2bd;
+  }
+  body {
+    font-family: 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', serif;
+    background: var(--paper);
+    color: var(--ink);
+    text-align: start;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+  .hero {
+    background: linear-gradient(to inline-end, #f3e3c2, #e6cf9f);
+    border-inline-start: 4px solid var(--accent);
+    border-radius: 8px;
+  }
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-inline-end: 12px;
+  }
+  a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/home">گھر</a>
+      <a href="/books">کتابیں</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero">
+      <h1>کتابوں کی دکان</h1>
+      <p>ہر ہفتے ایک نئی کتاب کی جھلک، سادہ زبان میں جائزہ اور اصل قیمت۔</p>
+      <p>آج کی تاریخ: ۲ نومبر ۲۰۲۶ — نئی آمد دیکھیں</p>
+      <a href="/next">اگلا صفحہ <span class="fa fa-arrow-right rtl:-scale-x-100"></span></a>
+    </section>
+    <section>
+      <article class="card">
+        <h2>اس مہینے کی پسند</h2>
+        <p>ایک دلچسپ کہانی جو بچوں اور بڑوں سب کو پسند آئے گی۔</p>
+      </article>
+    </section>
+  </main>
+  <footer>
+    <p>محبت سے بنایا گیا، ہر ہفتے تازہ۔</p>
+  </footer>
+</body>
+</html>
