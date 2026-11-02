@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Introduction · Parcel Docs</title>
+<style>
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; color: #0f172a; background: #ffffff; }
+  a { color: #2563eb; }
+  .sidebar { background: #f8fafc; border-right: 1px solid #e2e8f0; }
+  .sidebar a { color: #334155; display: block; padding: 4px 0; }
+  code { background: #f1f5f9; border-radius: 6px; padding: 1px 5px; }
+  pre { background: #0f172a; color: #e2e8f0; border-radius: 8px; padding: 16px; }
+  h1, h2 { border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <nav class="nav"><a href="#">Parcel</a> <a href="#">Guides</a> <a href="#">API</a> <a href="#">GitHub</a></nav>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <nav>
+      <a href="#">Getting started</a>
+      <a href="#">Installation</a>
+      <a href="#">Configuration</a>
+      <a href="#">Routing</a>
+      <a href="#">Middleware</a>
+      <a href="#">Testing</a>
+      <a href="#">Deployment</a>
+      <a href="#">CLI reference</a>
+      <a href="#">API reference</a>
+      <a href="#">Changelog</a>
+    </nav>
+  </aside>
+  <main>
+    <section class="doc-intro">
+      <h1>Introduction</h1>
+      <p>Parcel is a small routing library. This page explains what it does and when to use it.</p>
+    </section>
+    <section class="doc-install">
+      <h2>Installation</h2>
+      <pre>npm install parcel-router</pre>
+      <p>Requires Node 18 or newer.</p>
+    </section>
+    <section class="doc-usage">
+      <h2>Basic usage</h2>
+      <p>Define a route with <code>parcel.get()</code> and start the server:</p>
+      <pre>parcel.get("/", (req, res) => res.send("ok"));</pre>
+    </section>
+    <section class="doc-next">
+      <h2>Next steps</h2>
+      <p>Read the configuration guide, then the API reference.</p>
+    </section>
+  </main>
+</div>
+<footer class="site-footer">
+  <p>Parcel is MIT licensed. Docs version 4.2.</p>
+</footer>
+</body>
+</html>

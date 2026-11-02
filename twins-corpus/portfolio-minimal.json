@@ -1,0 +1,58 @@
+{
+  "name": "Minimal portfolio",
+  "description": "Black on white, huge whitespace, a work grid and a short bio — the minimal creative portfolio.",
+  "source": "twins-corpus/fixtures/portfolio-minimal.html (hand-authored archetype, fingerprinted by deslop-twins)",
+  "fingerprint": {
+    "version": 1,
+    "skeleton": {
+      "id": "skel:f890d0a1",
+      "string": "header@3 nav@4 main@3 section@4×3 footer@3",
+      "sequence": [
+        "header",
+        "nav",
+        "main",
+        "section",
+        "section",
+        "section",
+        "footer"
+      ],
+      "counts": {
+        "header": 1,
+        "nav": 1,
+        "main": 1,
+        "section": 3,
+        "article": 0,
+        "aside": 0,
+        "footer": 1
+      },
+      "divs": 5,
+      "maxDepth": 7,
+      "depthHist": {
+        "1": 1,
+        "2": 2,
+        "3": 5,
+        "4": 5,
+        "5": 10,
+        "6": 4,
+        "7": 8
+      }
+    },
+    "sections": [
+      "hero",
+      "features-grid",
+      "footer"
+    ],
+    "palette": [
+      "#000000",
+      "#737373",
+      "#ffffff"
+    ],
+    "fonts": [
+      "Arial",
+      "Helvetica",
+      "Helvetica Neue"
+    ],
+    "radius": [],
+    "shadows": false
+  }
+}

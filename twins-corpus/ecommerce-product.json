@@ -1,0 +1,65 @@
+{
+  "name": "E-commerce product page",
+  "description": "Product hero with price, spec grid, reviews, FAQ — a single-product store page.",
+  "source": "twins-corpus/fixtures/ecommerce-product.html (hand-authored archetype, fingerprinted by deslop-twins)",
+  "fingerprint": {
+    "version": 1,
+    "skeleton": {
+      "id": "skel:283a391e",
+      "string": "header@3 nav@4 main@3 section@4×4 footer@3",
+      "sequence": [
+        "header",
+        "nav",
+        "main",
+        "section",
+        "section",
+        "section",
+        "section",
+        "footer"
+      ],
+      "counts": {
+        "header": 1,
+        "nav": 1,
+        "main": 1,
+        "section": 4,
+        "article": 0,
+        "aside": 0,
+        "footer": 1
+      },
+      "divs": 4,
+      "maxDepth": 7,
+      "depthHist": {
+        "1": 1,
+        "2": 2,
+        "3": 6,
+        "4": 6,
+        "5": 15,
+        "6": 9,
+        "7": 6
+      }
+    },
+    "sections": [
+      "hero",
+      "features-grid",
+      "testimonials",
+      "faq",
+      "footer"
+    ],
+    "palette": [
+      "#ffffff",
+      "#292524",
+      "#b45309",
+      "#d97706",
+      "#f59e0b",
+      "#fde68a"
+    ],
+    "fonts": [
+      "DM Sans"
+    ],
+    "radius": [
+      "10px",
+      "12px"
+    ],
+    "shadows": false
+  }
+}

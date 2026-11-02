@@ -50,6 +50,48 @@ Sample, generated from `fixtures/sloppy.html` (score 100, Heavy Slop):
 [`examples/sample-audit-report.html`](examples/sample-audit-report.html) —
 download it and open it in a browser.
 
+## Visual Twins
+
+Most AI-built pages are not just slop in the details — they are the *same
+page* underneath: same hero → logos → features → pricing → FAQ → CTA
+skeleton, same palette, same font, same pillowy corners. **Visual Twins**
+fingerprints that template DNA and tells you whose layout yours is a twin
+of.
+
+```bash
+node bin/deslop.js twins https://your-site.com
+node bin/deslop.js twins page.html --corpus ./my-fingerprints --json
+```
+
+The fingerprint is computed from **source** — the fetched HTML plus its
+same-origin stylesheets, or a local HTML file plus its local stylesheets
+— and captures five signals: the DOM skeleton (landmark tags in order,
+their counts, a nesting-depth profile, hashed to a short id), the ordered
+**section pattern** (hero, logos, features-grid, testimonials, pricing,
+faq, cta, footer — detected with simple documented heuristics), the top-6
+**palette**, the **font** set, and the **radius/shadow** signature.
+Similarity is a weighted blend: section pattern 40%, palette 25%, fonts
+15%, structure 20% (the skeleton blended with radius/shadows).
+
+Targets are compared against a built-in corpus of ten page archetypes
+(hand-authored fixtures in [`twins-corpus/`](twins-corpus/), fingerprinted
+by the tool itself — regenerate with `node twins-corpus/build-corpus.js`).
+With `--corpus <dir>`, every fingerprint JSON in your folder joins the
+comparison, so a corpus of real collected pages (a launch index, a client
+list) can plug straight in. The demo in
+[`examples/`](examples/twins-demo-clone.html) — a SaaS landing written for
+this repo — scores **88%** against the "Generic SaaS landing (Tailwind
+default)" archetype, while a plain CV page tops out at **21%** against
+every archetype. Assertions live in
+[`tests/twins.test.js`](tests/twins.test.js).
+
+**Honest limits:** this is a source-signature comparison, not a
+screenshot diff and not ML. Two pages can share a fingerprint and still
+differ in detail, and a page whose styles are generated entirely at
+runtime by a JS framework will fingerprint thinner than it renders. Read
+the score as "how much of the same template DNA", not "how identical it
+looks".
+
 ## What it catches
 
 40 rules: 5 `fail` (Inter as the only font, purple-to-blue gradients in CSS

@@ -1,0 +1,65 @@
+{
+  "name": "shadcn-style dashboard landing",
+  "description": "Zinc neutrals, thin borders, small radius, Inter — the shadcn/ui landing-page look.",
+  "source": "twins-corpus/fixtures/shadcn-dashboard.html (hand-authored archetype, fingerprinted by deslop-twins)",
+  "fingerprint": {
+    "version": 1,
+    "skeleton": {
+      "id": "skel:bfba3751",
+      "string": "header@3 nav@4 main@3 section@4×4 footer@3",
+      "sequence": [
+        "header",
+        "nav",
+        "main",
+        "section",
+        "section",
+        "section",
+        "section",
+        "footer"
+      ],
+      "counts": {
+        "header": 1,
+        "nav": 1,
+        "main": 1,
+        "section": 4,
+        "article": 0,
+        "aside": 0,
+        "footer": 1
+      },
+      "divs": 6,
+      "maxDepth": 7,
+      "depthHist": {
+        "1": 1,
+        "2": 2,
+        "3": 6,
+        "4": 6,
+        "5": 14,
+        "6": 7,
+        "7": 6
+      }
+    },
+    "sections": [
+      "hero",
+      "features-grid",
+      "pricing",
+      "cta",
+      "footer"
+    ],
+    "palette": [
+      "#e4e4e7",
+      "#fafafa",
+      "#09090b",
+      "#18181b",
+      "#3f3f46",
+      "#71717a"
+    ],
+    "fonts": [
+      "Inter"
+    ],
+    "radius": [
+      "8px",
+      "9999px"
+    ],
+    "shadows": false
+  }
+}

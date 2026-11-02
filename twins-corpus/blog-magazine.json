@@ -1,0 +1,65 @@
+{
+  "name": "Blog / magazine",
+  "description": "Serif masthead, featured story, article index, newsletter block.",
+  "source": "twins-corpus/fixtures/blog-magazine.html (hand-authored archetype, fingerprinted by deslop-twins)",
+  "fingerprint": {
+    "version": 1,
+    "skeleton": {
+      "id": "skel:3891e99e",
+      "string": "header@3 nav@4 main@3 section@4×2 article@5×4 section@4 footer@3",
+      "sequence": [
+        "header",
+        "nav",
+        "main",
+        "section",
+        "section",
+        "article",
+        "article",
+        "article",
+        "article",
+        "section",
+        "footer"
+      ],
+      "counts": {
+        "header": 1,
+        "nav": 1,
+        "main": 1,
+        "section": 3,
+        "article": 4,
+        "aside": 0,
+        "footer": 1
+      },
+      "divs": 0,
+      "maxDepth": 7,
+      "depthHist": {
+        "1": 1,
+        "2": 2,
+        "3": 6,
+        "4": 6,
+        "5": 15,
+        "6": 8,
+        "7": 4
+      }
+    },
+    "sections": [
+      "hero",
+      "cta",
+      "footer"
+    ],
+    "palette": [
+      "#111111",
+      "#b91c1c",
+      "#ffffff",
+      "#e5e7eb"
+    ],
+    "fonts": [
+      "Georgia",
+      "Playfair Display",
+      "Source Serif 4"
+    ],
+    "radius": [
+      "2px"
+    ],
+    "shadows": false
+  }
+}

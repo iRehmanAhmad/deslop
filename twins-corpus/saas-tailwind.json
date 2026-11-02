@@ -1,0 +1,71 @@
+{
+  "name": "Generic SaaS landing (Tailwind default)",
+  "description": "The archetypal AI-generated SaaS page: gradient hero, logo strip, card features, pricing tiers, FAQ, CTA.",
+  "source": "twins-corpus/fixtures/saas-tailwind.html (hand-authored archetype, fingerprinted by deslop-twins)",
+  "fingerprint": {
+    "version": 1,
+    "skeleton": {
+      "id": "skel:5de9a35f",
+      "string": "header@3 nav@4 main@3 section@4×7 footer@3",
+      "sequence": [
+        "header",
+        "nav",
+        "main",
+        "section",
+        "section",
+        "section",
+        "section",
+        "section",
+        "section",
+        "section",
+        "footer"
+      ],
+      "counts": {
+        "header": 1,
+        "nav": 1,
+        "main": 1,
+        "section": 7,
+        "article": 0,
+        "aside": 0,
+        "footer": 1
+      },
+      "divs": 8,
+      "maxDepth": 7,
+      "depthHist": {
+        "1": 1,
+        "2": 2,
+        "3": 6,
+        "4": 9,
+        "5": 22,
+        "6": 17,
+        "7": 6
+      }
+    },
+    "sections": [
+      "hero",
+      "logos",
+      "features-grid",
+      "testimonials",
+      "pricing",
+      "faq",
+      "cta",
+      "footer"
+    ],
+    "palette": [
+      "#ffffff",
+      "#111827",
+      "#3b82f6",
+      "#6366f1",
+      "#8b5cf6",
+      "#e5e7eb"
+    ],
+    "fonts": [
+      "Inter"
+    ],
+    "radius": [
+      "16px",
+      "9999px"
+    ],
+    "shadows": true
+  }
+}

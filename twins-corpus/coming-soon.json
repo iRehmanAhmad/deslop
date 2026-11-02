@@ -1,0 +1,52 @@
+{
+  "name": "Coming soon / waitlist",
+  "description": "One dark hero, one email field, nothing else — the pre-launch placeholder page.",
+  "source": "twins-corpus/fixtures/coming-soon.html (hand-authored archetype, fingerprinted by deslop-twins)",
+  "fingerprint": {
+    "version": 1,
+    "skeleton": {
+      "id": "skel:1db45214",
+      "string": "main@3 section@4",
+      "sequence": [
+        "main",
+        "section"
+      ],
+      "counts": {
+        "header": 0,
+        "nav": 0,
+        "main": 1,
+        "section": 1,
+        "article": 0,
+        "aside": 0,
+        "footer": 0
+      },
+      "divs": 0,
+      "maxDepth": 6,
+      "depthHist": {
+        "1": 1,
+        "2": 2,
+        "3": 4,
+        "4": 1,
+        "5": 5,
+        "6": 2
+      }
+    },
+    "sections": [
+      "hero"
+    ],
+    "palette": [
+      "#0f172a",
+      "#38bdf8",
+      "#f8fafc",
+      "#1e293b",
+      "#334155"
+    ],
+    "fonts": [
+      "Sora"
+    ],
+    "radius": [
+      "9999px"
+    ],
+    "shadows": false
+  }
+}

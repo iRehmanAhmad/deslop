@@ -1,0 +1,71 @@
+{
+  "name": "Online course landing",
+  "description": "Hero, employer logos, curriculum cards, student quotes, one-time pricing, FAQ, deadline CTA.",
+  "source": "twins-corpus/fixtures/course-landing.html (hand-authored archetype, fingerprinted by deslop-twins)",
+  "fingerprint": {
+    "version": 1,
+    "skeleton": {
+      "id": "skel:f3318c78",
+      "string": "header@3 nav@4 main@3 section@4×7 footer@3",
+      "sequence": [
+        "header",
+        "nav",
+        "main",
+        "section",
+        "section",
+        "section",
+        "section",
+        "section",
+        "section",
+        "section",
+        "footer"
+      ],
+      "counts": {
+        "header": 1,
+        "nav": 1,
+        "main": 1,
+        "section": 7,
+        "article": 0,
+        "aside": 0,
+        "footer": 1
+      },
+      "divs": 7,
+      "maxDepth": 7,
+      "depthHist": {
+        "1": 1,
+        "2": 2,
+        "3": 6,
+        "4": 9,
+        "5": 21,
+        "6": 15,
+        "7": 6
+      }
+    },
+    "sections": [
+      "hero",
+      "logos",
+      "features-grid",
+      "testimonials",
+      "pricing",
+      "faq",
+      "cta",
+      "footer"
+    ],
+    "palette": [
+      "#0f172a",
+      "#f59e0b",
+      "#f8fafc",
+      "#ffffff",
+      "#1e293b",
+      "#e2e8f0"
+    ],
+    "fonts": [
+      "Inter"
+    ],
+    "radius": [
+      "12px",
+      "8px"
+    ],
+    "shadows": false
+  }
+}

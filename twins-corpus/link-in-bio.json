@@ -1,0 +1,50 @@
+{
+  "name": "Link-in-bio page",
+  "description": "Avatar, one-line bio and a stack of pill link buttons — the Linktree shape.",
+  "source": "twins-corpus/fixtures/link-in-bio.html (hand-authored archetype, fingerprinted by deslop-twins)",
+  "fingerprint": {
+    "version": 1,
+    "skeleton": {
+      "id": "skel:d51e61bb",
+      "string": "main@3 section@4",
+      "sequence": [
+        "main",
+        "section"
+      ],
+      "counts": {
+        "header": 0,
+        "nav": 0,
+        "main": 1,
+        "section": 1,
+        "article": 0,
+        "aside": 0,
+        "footer": 0
+      },
+      "divs": 0,
+      "maxDepth": 5,
+      "depthHist": {
+        "1": 1,
+        "2": 2,
+        "3": 4,
+        "4": 1,
+        "5": 8
+      }
+    },
+    "sections": [
+      "hero"
+    ],
+    "palette": [
+      "#ffffff",
+      "#0c4a6e",
+      "#0ea5e9",
+      "#f0f9ff"
+    ],
+    "fonts": [
+      "Poppins"
+    ],
+    "radius": [
+      "9999px"
+    ],
+    "shadows": false
+  }
+}

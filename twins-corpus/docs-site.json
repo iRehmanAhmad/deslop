@@ -1,0 +1,64 @@
+{
+  "name": "Documentation site",
+  "description": "Sidebar navigation, dense sections, code blocks — a framework docs page.",
+  "source": "twins-corpus/fixtures/docs-site.html (hand-authored archetype, fingerprinted by deslop-twins)",
+  "fingerprint": {
+    "version": 1,
+    "skeleton": {
+      "id": "skel:f67d2f78",
+      "string": "header@3 nav@4 aside@4 nav@5 main@4 section@5×4 footer@3",
+      "sequence": [
+        "header",
+        "nav",
+        "aside",
+        "nav",
+        "main",
+        "section",
+        "section",
+        "section",
+        "section",
+        "footer"
+      ],
+      "counts": {
+        "header": 1,
+        "nav": 2,
+        "main": 1,
+        "section": 4,
+        "article": 0,
+        "aside": 1,
+        "footer": 1
+      },
+      "divs": 1,
+      "maxDepth": 7,
+      "depthHist": {
+        "1": 1,
+        "2": 2,
+        "3": 5,
+        "4": 4,
+        "5": 9,
+        "6": 20,
+        "7": 1
+      }
+    },
+    "sections": [
+      "hero",
+      "footer"
+    ],
+    "palette": [
+      "#e2e8f0",
+      "#0f172a",
+      "#2563eb",
+      "#334155",
+      "#f1f5f9",
+      "#f8fafc"
+    ],
+    "fonts": [
+      "Segoe UI"
+    ],
+    "radius": [
+      "6px",
+      "8px"
+    ],
+    "shadows": false
+  }
+}

@@ -12,6 +12,9 @@
  *   node bin/deslop.js report <path-or-url> [--out file] [--client N] [--site N]
  *     (report mode lives in bin/deslop-report.js and writes a client-facing
  *      HTML audit report; see that file for details)
+ *   node bin/deslop.js twins <url-or-path> [--corpus dir] [--json]
+ *     (twins mode lives in bin/deslop-twins.js and fingerprints a page's
+ *      layout + style signature, ranking its "layout twins"; see that file)
  *
  * - path defaults to ./src when it exists, otherwise the current directory.
  * - Exit code is 1 when any "fail" rule hits, 0 otherwise.
@@ -682,6 +685,13 @@ function main(argv) {
     return require("./deslop-report.js").run(args.slice(1));
   }
 
+  // `deslop twins <url-or-path> ...` hands off to Visual Twins
+  // (bin/deslop-twins.js). A folder literally named "twins" can still be
+  // scanned via an explicit path such as ./twins.
+  if (args[0] === "twins") {
+    return require("./deslop-twins.js").run(args.slice(1));
+  }
+
   let format = "text";
   let target = null;
 
@@ -693,6 +703,8 @@ function main(argv) {
       console.log("  node bin/deslop.js [path] [--format text|json]");
       console.log("  node bin/deslop.js report <path-or-url> [--out report.html] [--client \"Name\"] [--site \"Name\"]");
       console.log("    report writes a client-facing HTML audit report (see bin/deslop-report.js)");
+      console.log("  node bin/deslop.js twins <url-or-path> [--corpus <dir>] [--json]");
+      console.log("    twins fingerprints a page's layout + style and ranks its layout twins (see bin/deslop-twins.js)");
       return 0;
     } else if (!args[i].startsWith("--")) {
       target = args[i];
